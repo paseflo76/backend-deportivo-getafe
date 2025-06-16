@@ -8,6 +8,7 @@ const { connecDB } = require('./src/config/db')
 const cloudinary = require('cloudinary').v2
 
 const app = express()
+
 app.use(cors())
 
 app.use(express.json())
