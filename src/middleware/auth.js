@@ -16,9 +16,9 @@ const checkAuth =
       const user = await User.findById(id)
       if (!user) return res.status(400).json('No estás autorizado')
 
-      if (role && user.rol !== role) {
+      if (role && user.rol.toLowerCase() !== role.toLowerCase()) {
         return res
-          .status(400)
+          .status(403)
           .json('Esta acción solo la pueden realizar los administradores')
       }
 
