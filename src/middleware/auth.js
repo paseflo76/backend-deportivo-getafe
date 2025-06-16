@@ -32,5 +32,5 @@ const checkAuth =
 
 module.exports = {
   isAuth: checkAuth(),
-  isAdmin: checkAuth('Admin')
+  isAdmin: checkAuth('admin')
 }
