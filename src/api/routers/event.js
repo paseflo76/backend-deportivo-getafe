@@ -18,7 +18,7 @@ eventsRouters.get('/tipos', (req, res) => {
 eventsRouters.get('/', getEvents)
 eventsRouters.post('/', [isAdmin], upload.single('img'), postEvents)
 eventsRouters.put('/:id', [isAuth], upload.single('img'), updateEvents)
-eventsRouters.delete('/:id', [isAdmin], deleteEvents)
+eventsRouters.delete('/:id', [isAdmin], upload.single('img'),deleteEvents)
 eventsRouters.patch('/:id/asistencia', [isAuth], updateAsistencia)
 
 module.exports = eventsRouters
