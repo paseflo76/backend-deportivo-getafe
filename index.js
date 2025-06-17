@@ -9,13 +9,13 @@ const cloudinary = require('cloudinary').v2
 
 const app = express()
 
-app.use(
-  cors({
-    origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-  })
-)
+app.use(cors({
+  origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}))
+
+app.options('*', cors()) // Responde preflight requests para todas las rutas
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -31,7 +31,6 @@ cloudinary.config({
 app.use('/api/v2/eventos', eventsRouters)
 app.use('/api/v2/users', userRoutes)
 
-//? Middleware para todas las rutas no definidas (sin '*')
 app.use((req, res) => {
   return res.status(400).json({ message: 'Route not found' })
 })
