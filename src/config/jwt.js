@@ -1,10 +1,14 @@
 const jwt = require('jsonwebtoken')
-//?  Funcion  para generar la LLAVE TOKEN
+
+// Genera token JWT con id y rol
 const generateSign = (id, rol) => {
+  if (!id || !rol) throw new Error('Faltan id o rol para generar token')
   return jwt.sign({ id, rol }, process.env.JWT_SECRET, { expiresIn: '1y' })
 }
-//?  F//? Controladoruncion  para comprobar si la llave la hemos hecho nosotros
+
+// Verifica token JWT
 const verifyJwt = (token) => {
+  if (!token) throw new Error('Token no proporcionado')
   return jwt.verify(token, process.env.JWT_SECRET)
 }
 

@@ -10,6 +10,10 @@ const {
 const userRoutes = require('express').Router()
 
 //? Rutas a los Usuarios
+userRoutes.get('/admin-only', isAuth, isAdmin, (req, res) => {
+  res.status(200).json({ message: 'Bienvenido adminitrador' })
+})
+
 userRoutes.get('/', [isAdmin], getUsers)
 userRoutes.post('/Register', register)
 userRoutes.post('/Login', login)
