@@ -39,12 +39,12 @@ const register = async (req, res) => {
 }
 
 const login = async (req, res) => {
-  const { email, password } = req.body
-  if (!email || !password)
+  const { userName, password } = req.body
+  if (!userName || !password)
     return res.status(400).json({ message: 'Faltan campos obligatorios' })
 
   try {
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ userName })
     if (!user)
       return res
         .status(400)
