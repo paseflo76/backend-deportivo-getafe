@@ -1,8 +1,9 @@
+// backend/src/api/controller/user.js
+
 const User = require('../models/user')
 const { generateSign } = require('../../config/jwt')
 const bcrypt = require('bcrypt')
 const { validateRegister } = require('../../utils/validateUser')
-
 
 const getUsers = async (req, res) => {
   try {
@@ -12,7 +13,6 @@ const getUsers = async (req, res) => {
     return res.status(400).json(error)
   }
 }
-
 
 const register = async (req, res) => {
   const { userName, email, password } = req.body
@@ -38,9 +38,7 @@ const register = async (req, res) => {
   }
 }
 
-
 const login = async (req, res) => {
-   console.log(req.body)
   const { email, password } = req.body
   if (!email || !password)
     return res.status(400).json({ message: 'Faltan campos obligatorios' })
@@ -48,11 +46,15 @@ const login = async (req, res) => {
   try {
     const user = await User.findOne({ email })
     if (!user)
-      return res.status(400).json({ message: 'El usuario o la contraseña son incorrectos' })
+      return res
+        .status(400)
+        .json({ message: 'El usuario o la contraseña son incorrectos' })
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password)
     if (!isPasswordCorrect)
-      return res.status(400).json({ message: 'El usuario o la contraseña son incorrectos' })
+      return res
+        .status(400)
+        .json({ message: 'El usuario o la contraseña son incorrectos' })
 
     const token = generateSign(user._id, user.rol)
     const { password: _, ...userData } = user._doc
@@ -62,7 +64,6 @@ const login = async (req, res) => {
     return res.status(500).json({ message: 'Error en el servidor', error })
   }
 }
-
 
 const updateUser = async (req, res) => {
   try {
@@ -82,7 +83,6 @@ const updateUser = async (req, res) => {
       .json({ message: 'Error al actualizar el usuario', error })
   }
 }
-
 
 const deleteUser = async (req, res) => {
   try {
