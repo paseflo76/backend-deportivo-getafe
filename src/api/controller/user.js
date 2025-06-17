@@ -46,15 +46,11 @@ const login = async (req, res) => {
   try {
     const user = await User.findOne({ userName })
     if (!user)
-      return res
-        .status(400)
-        .json({ message: 'El usuario o la contraseña son incorrectos' })
+      return res.status(400).json({ message: 'El usuario o la contraseña son incorrectos' })
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password)
     if (!isPasswordCorrect)
-      return res
-        .status(400)
-        .json({ message: 'El usuario o la contraseña son incorrectos' })
+      return res.status(400).json({ message: 'El usuario o la contraseña son incorrectos' })
 
     const token = generateSign(user._id, user.rol)
     const { password: _, ...userData } = user._doc
