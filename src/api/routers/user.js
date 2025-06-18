@@ -15,8 +15,8 @@ userRoutes.get('/admin-only', isAuth, isAdmin, (req, res) => {
 })
 
 userRoutes.get('/', [isAdmin], getUsers)
-userRoutes.post('/register', register)
-userRoutes.post('/login', login)
+userRoutes.post('/Register', register)
+userRoutes.post('/Login', login)
 userRoutes.put('/:id', [isAdmin], updateUser)
 userRoutes.delete('/:id', [isAuth], deleteUser)
 
