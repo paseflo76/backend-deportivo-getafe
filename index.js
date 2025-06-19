@@ -15,7 +15,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }))
 
-app.options('*', cors()) // Responde preflight requests para todas las rutas
+Responde preflight requests para todas las rutas
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
