@@ -26,7 +26,7 @@ const register = async (req, res) => {
     const newUser = new User({
       userName,
       email,
-      password, // No hashear aquí, se hace en el pre('save')
+      password, 
       rol: 'user'
     })
 
