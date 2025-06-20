@@ -39,6 +39,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   const { userName, password } = req.body
+    console.log('Login req.body:', req.body)
   if (!userName || !password)
     return res.status(400).json({ message: 'Faltan campos obligatorios' })
 
