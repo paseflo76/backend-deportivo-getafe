@@ -38,13 +38,12 @@ const register = async (req, res) => {
 }
 
 const login = async (req, res) => {
-  const { userName, password } = req.body
-    console.log('Login req.body:', req.body)
-  if (!userName || !password)
+  const { userName, email, password } = req.body
+  if (!userName || !email || !password)
     return res.status(400).json({ message: 'Faltan campos obligatorios' })
 
   try {
-    const user = await User.findOne({ userName })
+    const user = await User.findOne({ userName, email })
     if (!user)
       return res.status(400).json({ message: 'El usuario o la contraseña son incorrectos' })
 
@@ -60,6 +59,7 @@ const login = async (req, res) => {
     return res.status(500).json({ message: 'Error en el servidor', error })
   }
 }
+
 
 const updateUser = async (req, res) => {
   try {
