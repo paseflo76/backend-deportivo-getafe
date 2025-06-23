@@ -9,15 +9,14 @@ const cloudinary = require('cloudinary').v2
 
 const app = express()
 
-app.use(cors())
-/* app.use(
+app.use(
   cors({
     origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
   })
-) */
+)
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
