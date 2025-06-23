@@ -24,13 +24,13 @@ const register = async (req, res) => {
     const duplicateUser = await User.findOne({ userName })
     if (duplicateUser) return res.status(400).json('Ese Nombre Ya Esta Ocupado')
 
-    const hashedPassword = await bcrypt.hash(password, 10)
     const newUser = new User({
       userName,
       email,
-      password: hashedPassword,
+      password,
       rol: 'user'
     })
+
     const userSaved = await newUser.save()
     return res.status(201).json(userSaved)
   } catch (error) {
@@ -46,11 +46,15 @@ const login = async (req, res) => {
   try {
     const user = await User.findOne({ userName })
     if (!user)
-      return res.status(400).json({ message: 'El usuario o la contraseña son incorrectos' })
+      return res
+        .status(400)
+        .json({ message: 'El usuario o la contraseña son incorrectos' })
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password)
     if (!isPasswordCorrect)
-      return res.status(400).json({ message: 'El usuario o la contraseña son incorrectos' })
+      return res
+        .status(400)
+        .json({ message: 'El usuario o la contraseña son incorrectos' })
 
     const token = generateSign(user._id, user.rol)
     const { password: _, ...userData } = user._doc
