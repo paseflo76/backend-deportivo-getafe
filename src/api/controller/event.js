@@ -97,12 +97,10 @@ const updateAsistencia = async (req, res) => {
     const updatedEvent = await evento.save()
     return res.status(200).json(updatedEvent)
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: 'Error al actualizar asistencia',
-        details: error.message
-      })
+    return res.status(500).json({
+      message: 'Error al actualizar asistencia',
+      details: error.message
+    })
   }
 }
 
