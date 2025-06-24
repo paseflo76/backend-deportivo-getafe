@@ -35,24 +35,20 @@ const updateEvents = async (req, res) => {
     if (!oldEvent)
       return res.status(404).json({ error: 'Evento no encontrado' })
 
-    if (req.file && oldEvent.img) deleteFile(oldEvent.img)
-
-    const updateData = {
-      titulo: req.body.titulo,
-      fecha: req.body.fecha,
-      lugar: req.body.lugar,
-      tipo: req.body.tipo
+    const updateData = { ...req.body }
+    if (req.file) {
+      if (oldEvent.img) deleteFile(oldEvent.img)
+      updateData.img = req.file.path
     }
-    if (req.file) updateData.img = req.file.path
 
     const updatedEvent = await Events.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true
     })
 
-    return res.status(200).json(updatedEvent)
+    res.status(200).json(updatedEvent)
   } catch (error) {
-    return res
+    res
       .status(400)
       .json({ error: 'Error al actualizar el evento', details: error.message })
   }
@@ -80,22 +76,25 @@ const updateAsistencia = async (req, res) => {
     const { estado } = req.body
 
     const ESTADOS_VALIDOS = ['Va a entrenar 👍', 'En duda ❓', 'No puede ❌']
-    if (!ESTADOS_VALIDOS.includes(estado))
+    if (!ESTADOS_VALIDOS.includes(estado)) {
       return res.status(400).json({ message: 'Estado no válido' })
+    }
 
     const evento = await Events.findById(id)
     if (!evento)
       return res.status(404).json({ message: 'Evento no encontrado' })
 
-    const asistenteIndex = evento.asistentes.findIndex(
+    const asistente = evento.asistentes.find(
       (a) => a.user.toString() === userId.toString()
     )
+    if (asistente) {
+      asistente.estado = estado
+    } else {
+      evento.asistentes.push({ user: userId, estado })
+    }
 
-    if (asistenteIndex !== -1) evento.asistentes[asistenteIndex].estado = estado
-    else evento.asistentes.push({ user: userId, estado })
-
-    const updatedEvent = await evento.save()
-    return res.status(200).json(updatedEvent)
+    const updated = await evento.save()
+    res.status(200).json(updated)
   } catch (error) {
     return res.status(500).json({
       message: 'Error al actualizar asistencia',
