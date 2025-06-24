@@ -44,13 +44,7 @@ const login = async (req, res) => {
         .status(400)
         .json({ message: 'El usuario o la contraseña son incorrectos' })
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password)
-    if (!isPasswordCorrect)
-      return res
-        .status(400)
-        .json({ message: 'El usuario o la contraseña son incorrectos' })
-
-    return res.status(400).json({ message: 'Credenciales incorrectas' })
+    
 
     const valid = await bcrypt.compare(password, user.password)
     if (!valid)
@@ -89,7 +83,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params
-    if (req.user.rol !== 'Admin' && req.user._id.toString() !== id) {
+    if (req.user.rol !== 'admin' && req.user._id.toString() !== id) {
       return res
         .status(403)
         .json({ message: 'No autorizado para eliminar este usuario' })
