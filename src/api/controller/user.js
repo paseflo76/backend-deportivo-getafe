@@ -14,22 +14,18 @@ const getUsers = async (req, res) => {
   }
 }
 
-const register = async (req, res) => {
-  const { userName, email, password } = req.body
-  const { valid, errors } = validateRegister(req.body)
-  if (!valid)
-    return res.status(400).json({ message: 'Datos inválidos', errors })
-
+const register = async (req, res, next) => {
   try {
-    const duplicateUser = await User.findOne({ userName })
-    if (duplicateUser) return res.status(400).json('Ese Nombre Ya Esta Ocupado')
-
     const newUser = new User({
-      userName,
-      email,
-      password,
+      userName: req.body.userName,
+      email: req.body.email,
+      password: req.body.password,
       rol: 'user'
     })
+    const duplicateUser = await User.findOne({ userName: req.body.userName })
+    if (duplicateUser) {
+      return res.status(400).json('Ese Nombre Ya Esta Ocupado')
+    }
 
     const userSaved = await newUser.save()
     return res.status(201).json(userSaved)
@@ -38,23 +34,29 @@ const register = async (req, res) => {
   }
 }
 
-const login = async (req, res) => {
-  const { userName, email, password } = req.body
-  if (!userName || !email || !password)
+const login = async (req, res, next) => {
+  const { userName, password } = req.body
+
+  if (!userName || !password) {
     return res.status(400).json({ message: 'Faltan campos obligatorios' })
+  }
 
   try {
-    const user = await User.findOne({ userName, email })
-    if (!user)
+    const user = await User.findOne({ userName })
+
+    if (!user) {
       return res
         .status(400)
         .json({ message: 'El usuario o la contraseña son incorrectos' })
+    }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password)
-    if (!isPasswordCorrect)
+
+    if (!isPasswordCorrect) {
       return res
         .status(400)
         .json({ message: 'El usuario o la contraseña son incorrectos' })
+    }
 
     const token = generateSign(user._id, user.rol)
     const { password: _, ...userData } = user._doc
