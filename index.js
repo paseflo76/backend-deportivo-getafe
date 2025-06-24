@@ -20,7 +20,7 @@ app.use(
   cors({
     origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
->>>>>>> nombre-nueva-rama
+
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
   })
