@@ -71,35 +71,39 @@ const deleteEvents = async (req, res) => {
 // Controlador para actualizar asistencia
 const updateAsistencia = async (req, res) => {
   try {
-    const { id } = req.params
+    const { id } = req.params // id del evento
     const userId = req.user._id
     const { estado } = req.body
 
-    const ESTADOS_VALIDOS = ['Va a entrenar 👍', 'En duda ❓', 'No puede ❌']
-    if (!ESTADOS_VALIDOS.includes(estado)) {
+    // Validar estado
+    const estadosValidos = ['Va a entrenar 👍', 'En duda ❓', 'No puede ❌']
+    if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ message: 'Estado no válido' })
     }
 
     const evento = await Events.findById(id)
-    if (!evento)
+    if (!evento) {
       return res.status(404).json({ message: 'Evento no encontrado' })
+    }
 
-    const asistente = evento.asistentes.find(
+    // Buscar si ya existe el usuario en asistentes
+    const index = evento.asistentes.findIndex(
       (a) => a.user.toString() === userId.toString()
     )
-    if (asistente) {
-      asistente.estado = estado
+
+    if (index !== -1) {
+      // Si ya existe, actualiza el estado
+      evento.asistentes[index].estado = estado
     } else {
+      // Si no existe, lo agrega
       evento.asistentes.push({ user: userId, estado })
     }
 
-    const updated = await evento.save()
-    res.status(200).json(updated)
+    const eventoActualizado = await evento.save()
+    return res.status(200).json(eventoActualizado)
   } catch (error) {
-    return res.status(500).json({
-      message: 'Error al actualizar asistencia',
-      details: error.message
-    })
+    console.error(error)
+    return res.status(500).json({ message: 'Error al actualizar asistencia' })
   }
 }
 
