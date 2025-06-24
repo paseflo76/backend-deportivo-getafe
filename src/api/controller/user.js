@@ -14,97 +14,86 @@ const getUsers = async (req, res) => {
   }
 }
 
-const register = async (req, res, next) => {
+const register = async (req, res) => {
   try {
-    const newUser = new User({
-      userName: req.body.userName,
-      email: req.body.email,
-      password: req.body.password,
-      rol: 'user'
-    })
-    const duplicateUser = await User.findOne({ userName: req.body.userName })
-    if (duplicateUser) {
-      return res.status(400).json('Ese Nombre Ya Esta Ocupado')
-    }
+    const { userName, email, password } = req.body
 
-    const userSaved = await newUser.save()
-    return res.status(201).json(userSaved)
+    const duplicate = await User.findOne({ userName })
+    if (duplicate)
+      return res.status(400).json({ message: 'Nombre de usuario ya existe' })
+
+    const newUser = new User({ userName, email, password, rol: 'user' })
+    const saved = await newUser.save()
+    res.status(201).json(saved)
   } catch (error) {
-    return res.status(400).json(error)
+    res
+      .status(400)
+      .json({ message: 'Error al registrar usuario', details: error.message })
   }
 }
 
-const login = async (req, res, next) => {
+const login = async (req, res) => {
   const { userName, password } = req.body
-
-  if (!userName || !password) {
+  if (!userName || !password)
     return res.status(400).json({ message: 'Faltan campos obligatorios' })
-  }
 
   try {
     const user = await User.findOne({ userName })
+    if (!user)
+      return res.status(400).json({ message: 'Credenciales incorrectas' })
 
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: 'El usuario o la contraseña son incorrectos' })
-    }
-
-    const isPasswordCorrect = await bcrypt.compare(password, user.password)
-
-    if (!isPasswordCorrect) {
-      return res
-        .status(400)
-        .json({ message: 'El usuario o la contraseña son incorrectos' })
-    }
+    const valid = await bcrypt.compare(password, user.password)
+    if (!valid)
+      return res.status(400).json({ message: 'Credenciales incorrectas' })
 
     const token = generateSign(user._id, user.rol)
     const { password: _, ...userData } = user._doc
 
-    return res.status(200).json({ user: userData, token })
+    res.status(200).json({ user: userData, token })
   } catch (error) {
-    return res.status(500).json({ message: 'Error en el servidor', error })
+    res.status(500).json({ message: 'Error interno', details: error.message })
   }
 }
 
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params
-    const { rol, ...updateData } = req.body
-    const updatedUser = await User.findByIdAndUpdate(
+    const { rol, ...data } = req.body
+
+    const updated = await User.findByIdAndUpdate(
       id,
-      { ...updateData, ...(rol && { rol }) },
+      { ...data, ...(rol && { rol }) },
       { new: true }
     )
-    if (!updatedUser)
+
+    if (!updated)
       return res.status(404).json({ message: 'Usuario no encontrado' })
-    return res.status(200).json(updatedUser)
+    res.status(200).json(updated)
   } catch (error) {
-    return res
+    res
       .status(500)
-      .json({ message: 'Error al actualizar el usuario', error })
+      .json({ message: 'Error al actualizar usuario', details: error.message })
   }
 }
 
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params
-    if (
-      req.user.rol.toLowerCase() !== 'admin' &&
-      req.user._id.toString() !== id
-    ) {
+    if (req.user.rol !== 'Admin' && req.user._id.toString() !== id) {
       return res
         .status(403)
-        .json({ message: 'No puedes eliminar este usuario' })
+        .json({ message: 'No autorizado para eliminar este usuario' })
     }
-    const deletedUser = await User.findByIdAndDelete(id)
-    if (!deletedUser)
-      return res.status(404).json({ message: 'usuario no encontrado' })
-    return res.status(200).json({ message: 'usuario eliminado correctamente' })
+
+    const deleted = await User.findByIdAndDelete(id)
+    if (!deleted)
+      return res.status(404).json({ message: 'Usuario no encontrado' })
+
+    res.status(200).json({ message: 'Usuario eliminado correctamente' })
   } catch (error) {
-    return res
+    res
       .status(500)
-      .json({ message: 'error al eliminar el usuario', error })
+      .json({ message: 'Error al eliminar usuario', details: error.message })
   }
 }
 
