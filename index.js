@@ -8,13 +8,13 @@ const { connecDB } = require('./src/config/db')
 const cloudinary = require('cloudinary').v2
 
 const app = express()
-<<<<<<< HEAD
+
 /* app.use(cors()) */
 app.use(
   cors({
     origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-=======
+
 
 app.use(
   cors({
@@ -25,8 +25,7 @@ app.use(
     credentials: true
   })
 )
-<<<<<<< HEAD
-=======
+
 
 app.use((req, res, next) => {
   res.header(
@@ -43,7 +42,7 @@ app.use((req, res, next) => {
   )
   next()
 })
->>>>>>> nombre-nueva-rama
+
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
