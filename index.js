@@ -12,7 +12,7 @@ const app = express()
 app.use(
   cors({
     origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
   })
@@ -52,6 +52,12 @@ app.use((req, res) => {
   return res.status(400).json({ message: 'Route not found' })
 })
 
-app.listen(3000, () => {
+/* app.listen(3000, () => {
   console.log('Servidor funcionando en http://localhost:3000 🎆🎆😊')
+})
+ */
+
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => {
+  console.log(`Servidor funcionando en http://localhost:${PORT}`)
 })
