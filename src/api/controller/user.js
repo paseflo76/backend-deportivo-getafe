@@ -44,8 +44,6 @@ const login = async (req, res) => {
         .status(400)
         .json({ message: 'El usuario o la contraseña son incorrectos' })
 
-    
-
     const valid = await bcrypt.compare(password, user.password)
     if (!valid)
       return res.status(400).json({ message: 'Credenciales incorrectas' })
