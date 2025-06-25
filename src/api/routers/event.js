@@ -16,9 +16,15 @@ eventsRouters.get('/tipos', (req, res) => {
 })
 
 eventsRouters.get('/', getEvents)
-eventsRouters.post('/', [isAdmin], upload.single('img'), postEvents)
+eventsRouters.post('/', [isAuth, isAdmin], upload.single('img'), postEvents)
+
 eventsRouters.put('/:id', [isAuth], upload.single('img'), updateEvents)
-eventsRouters.delete('/:id', [isAdmin], upload.single('img'), deleteEvents)
+eventsRouters.delete(
+  '/:id',
+  [isAuth, isAdmin],
+  upload.single('img'),
+  deleteEvents
+)
 
 eventsRouters.patch('/:id/asistencia', [isAuth], updateAsistencia)
 
