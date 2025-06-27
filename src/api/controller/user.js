@@ -1,6 +1,8 @@
 const User = require('../models/user')
 const { generateSign } = require('../../config/jwt')
 const bcrypt = require('bcrypt')
+const fs = require('fs')
+const path = require('path')
 const { validateRegister } = require('../../utils/validateUser')
 
 const getUsers = async (req, res) => {
@@ -12,9 +14,25 @@ const getUsers = async (req, res) => {
   }
 }
 
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params
+    const user = await User.findById(id).select('-password')
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' })
+    return res.status(200).json(user)
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: 'Error interno', details: error.message })
+  }
+}
+
 const register = async (req, res) => {
   try {
     const { userName, email, password } = req.body
+    const { valid, errors } = validateRegister(req.body)
+    if (!valid)
+      return res.status(400).json({ message: 'Datos inválidos', errors })
 
     const duplicate = await User.findOne({ userName })
     if (duplicate)
@@ -65,9 +83,9 @@ const updateUser = async (req, res) => {
       { ...data, ...(rol && { rol }) },
       { new: true }
     )
-
     if (!updated)
       return res.status(404).json({ message: 'Usuario no encontrado' })
+
     res.status(200).json(updated)
   } catch (error) {
     res
@@ -89,6 +107,18 @@ const deleteUser = async (req, res) => {
     if (!deleted)
       return res.status(404).json({ message: 'Usuario no encontrado' })
 
+    // Borrar avatar del servidor si existe
+    if (deleted.avatar) {
+      const avatarPath = path.join(
+        __dirname,
+        '../../uploads/avatars',
+        path.basename(deleted.avatar)
+      )
+      if (fs.existsSync(avatarPath)) {
+        fs.unlinkSync(avatarPath)
+      }
+    }
+
     res.status(200).json({ message: 'Usuario eliminado correctamente' })
   } catch (error) {
     res
@@ -97,4 +127,48 @@ const deleteUser = async (req, res) => {
   }
 }
 
-module.exports = { getUsers, register, login, updateUser, deleteUser }
+const uploadAvatar = async (req, res) => {
+  try {
+    const { id } = req.params
+    if (!req.file)
+      return res.status(400).json({ message: 'Archivo no enviado' })
+
+    const user = await User.findById(id)
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' })
+
+    // Borrar avatar anterior si existe
+    if (user.avatar) {
+      const oldAvatarPath = path.join(
+        __dirname,
+        '../../uploads/avatars',
+        path.basename(user.avatar)
+      )
+      if (fs.existsSync(oldAvatarPath)) {
+        fs.unlinkSync(oldAvatarPath)
+      }
+    }
+
+    // Guardar ruta relativa al avatar nuevo
+    user.avatar = `/uploads/avatars/${req.file.filename}`
+    await user.save()
+
+    res
+      .status(200)
+      .json({ message: 'Avatar subido correctamente', avatar: user.avatar })
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: 'Error al subir avatar', details: error.message })
+  }
+}
+
+module.exports = {
+  getUsers,
+  getUserById,
+  register,
+  login,
+  updateUser,
+  deleteUser,
+  uploadAvatar
+}
+
