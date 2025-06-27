@@ -1,4 +1,3 @@
-
 const User = require('../models/user')
 const { generateSign } = require('../../config/jwt')
 const bcrypt = require('bcrypt')
@@ -16,8 +15,9 @@ const getUsers = async (req, res) => {
 }
 
 const getUserById = async (req, res) => {
+  const { id } = req.params
+  if (!id) return res.status(400).json({ message: 'ID de usuario requerido' })
   try {
-    const { id } = req.params
     const user = await User.findById(id).select('-password')
     if (!user) return res.status(404).json({ message: 'Usuario no encontrado' })
     return res.status(200).json(user)
