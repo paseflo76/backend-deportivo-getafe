@@ -1,4 +1,3 @@
-// backend/routes/userRoutes.js
 const { isAdmin, isAuth } = require('../../middleware/auth')
 const multer = require('multer')
 const path = require('path')
@@ -25,6 +24,10 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({ storage })
+
+userRoutes.get('/validate', isAuth, (req, res) => {
+  res.status(200).json({ message: 'Token válido', user: req.user })
+})
 
 userRoutes.get('/admin-only', isAuth, isAdmin, (req, res) => {
   res.status(200).json({ message: 'Bienvenido administrador' })
