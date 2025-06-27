@@ -1,3 +1,4 @@
+// backend/src/api/controller/user.js
 const User = require('../models/user')
 const { generateSign } = require('../../config/jwt')
 const bcrypt = require('bcrypt')
@@ -171,4 +172,3 @@ module.exports = {
   deleteUser,
   uploadAvatar
 }
-
