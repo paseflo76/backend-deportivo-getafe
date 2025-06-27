@@ -1,8 +1,6 @@
 const User = require('../models/user')
 const { generateSign } = require('../../config/jwt')
 const bcrypt = require('bcrypt')
-const fs = require('fs')
-const path = require('path')
 const { validateRegister } = require('../../utils/validateUser')
 
 const getUsers = async (req, res) => {
@@ -108,18 +106,6 @@ const deleteUser = async (req, res) => {
     if (!deleted)
       return res.status(404).json({ message: 'Usuario no encontrado' })
 
-    // Borrar avatar del servidor si existe
-    if (deleted.avatar) {
-      const avatarPath = path.join(
-        __dirname,
-        '../../uploads/avatars',
-        path.basename(deleted.avatar)
-      )
-      if (fs.existsSync(avatarPath)) {
-        fs.unlinkSync(avatarPath)
-      }
-    }
-
     res.status(200).json({ message: 'Usuario eliminado correctamente' })
   } catch (error) {
     res
@@ -137,20 +123,7 @@ const uploadAvatar = async (req, res) => {
     const user = await User.findById(id)
     if (!user) return res.status(404).json({ message: 'Usuario no encontrado' })
 
-    // Borrar avatar anterior si existe
-    if (user.avatar) {
-      const oldAvatarPath = path.join(
-        __dirname,
-        '../../uploads/avatars',
-        path.basename(user.avatar)
-      )
-      if (fs.existsSync(oldAvatarPath)) {
-        fs.unlinkSync(oldAvatarPath)
-      }
-    }
-
-    // Guardar ruta relativa al avatar nuevo
-    user.avatar = `/uploads/avatars/${req.file.filename}`
+    user.avatar = req.file.path
     await user.save()
 
     res

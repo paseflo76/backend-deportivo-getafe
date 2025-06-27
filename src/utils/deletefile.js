@@ -1,31 +1,17 @@
 const cloudinary = require('cloudinary').v2
 
-//? Función para eliminar una imagen de Cloudinary a partir de su URL.
-
 const deleteFile = (url) => {
-  if (!url) {
-    console.warn('URL no válida para eliminar la imagen')
-    return
-  }
+  if (!url) return
 
   try {
-    const imgSplited = url.split('/')
-    const folderName = imgSplited.at(-2)
-    const fileName = imgSplited.at(-1).split('.')[0]
+    const parts = url.split('/')
+    const folder = parts.at(-2)
+    const name = parts.at(-1).split('.')[0]
+    if (!folder || !name) return
 
-    if (!folderName || !fileName) {
-      console.warn('No se pudo extraer folder o filename correctamente')
-      return
-    }
-
-    const publicId = `${folderName}/${fileName}`
-
-    cloudinary.uploader.destroy(publicId, (error, result) => {
-      if (error) {
-        console.error('Error al eliminar en Cloudinary:', error)
-      } else {
-        console.log('Imagen eliminada de Cloudinary:', result)
-      }
+    const publicId = `${folder}/${name}`
+    cloudinary.uploader.destroy(publicId, (err, res) => {
+      if (err) console.error('Error al eliminar en Cloudinary:', err)
     })
   } catch (err) {
     console.error('Error en deleteFile:', err.message)
