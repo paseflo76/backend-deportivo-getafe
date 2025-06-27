@@ -2,6 +2,7 @@ const User = require('../models/user')
 const { generateSign } = require('../../config/jwt')
 const bcrypt = require('bcrypt')
 const { validateRegister } = require('../../utils/validateUser')
+const { deleteFile } = require('../../utils/deletefile')
 
 const getUsers = async (req, res) => {
   try {
@@ -105,6 +106,10 @@ const deleteUser = async (req, res) => {
     const deleted = await User.findByIdAndDelete(id)
     if (!deleted)
       return res.status(404).json({ message: 'Usuario no encontrado' })
+
+    if (deleted.avatar) {
+      await deleteFile(deleted.avatar)
+    }
 
     res.status(200).json({ message: 'Usuario eliminado correctamente' })
   } catch (error) {

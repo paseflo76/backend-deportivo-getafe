@@ -1,4 +1,5 @@
 const { isAdmin, isAuth } = require('../../middleware/auth')
+const upload = require('../../middleware/file')
 const {
   getUsers,
   getUserById,
@@ -9,7 +10,6 @@ const {
   uploadAvatar
 } = require('../controller/user')
 
-const upload = require('../../config/multerCloudinary')
 const userRoutes = require('express').Router()
 
 userRoutes.get('/validate', isAuth, (req, res) => {
