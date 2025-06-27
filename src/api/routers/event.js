@@ -17,7 +17,6 @@ eventsRouters.get('/tipos', (req, res) => {
 
 eventsRouters.get('/', getEvents)
 eventsRouters.post('/', [isAuth, isAdmin], upload.single('img'), postEvents)
-
 eventsRouters.put('/:id', [isAuth], upload.single('img'), updateEvents)
 eventsRouters.delete(
   '/:id',
