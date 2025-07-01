@@ -1,5 +1,5 @@
 const User = require('../models/user')
-const { generateSign } = require('../../config/jwt')
+const { generateSign, verifyJwt } = require('../../config/jwt')
 const bcrypt = require('bcrypt')
 const { validateRegister } = require('../../utils/validateUser')
 const { deleteFile } = require('../../utils/deletefile')
@@ -49,12 +49,20 @@ const register = async (req, res) => {
 
     const newUser = new User({ userName, email, password, rol: 'user' })
     const saved = await newUser.save()
-    return res.status(201).json(saved)
+
+    const token = verifyJwt.sign(
+      { id: saved._id, rol: saved.rol },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '7d'
+      }
+    )
+
+    res.status(201).json({ token, user: saved })
   } catch (error) {
-    return res.status(500).json({
-      message: 'Error interno al registrar',
-      details: error.message
-    })
+    res
+      .status(500)
+      .json({ message: 'Error al registrar usuario', details: error.message })
   }
 }
 
