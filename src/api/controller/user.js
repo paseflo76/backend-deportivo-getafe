@@ -49,11 +49,12 @@ const register = async (req, res) => {
 
     const newUser = new User({ userName, email, password, rol: 'user' })
     const saved = await newUser.save()
-    res.status(201).json(saved)
+    return res.status(201).json(saved)
   } catch (error) {
-    res
-      .status(400)
-      .json({ message: 'Error al registrar usuario', details: error.message })
+    return res.status(500).json({
+      message: 'Error interno al registrar',
+      details: error.message
+    })
   }
 }
 
