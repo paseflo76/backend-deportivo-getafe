@@ -20,7 +20,7 @@ userRoutes.get('/admin-only', isAuth, isAdmin, (req, res) => {
   res.status(200).json({ message: 'Bienvenido administrador' })
 })
 
-userRoutes.get('/', isAdmin, getUsers)
+userRoutes.get('/', isAuth, isAdmin, getUsers)
 userRoutes.get('/:id', isAuth, getUserById)
 userRoutes.post('/register', register)
 userRoutes.post('/login', login)
