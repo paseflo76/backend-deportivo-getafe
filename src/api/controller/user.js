@@ -1,5 +1,5 @@
 const User = require('../models/user')
-const { generateSign, verifyJwt } = require('../../config/jwt')
+const { generateSign } = require('../../config/jwt')
 const bcrypt = require('bcrypt')
 const { validateRegister } = require('../../utils/validateUser')
 const { deleteFile } = require('../../utils/deletefile')
@@ -26,6 +26,7 @@ const getUserById = async (req, res) => {
       .json({ message: 'Error interno', details: error.message })
   }
 }
+
 const getMyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password')
@@ -50,19 +51,15 @@ const register = async (req, res) => {
     const newUser = new User({ userName, email, password, rol: 'user' })
     const saved = await newUser.save()
 
-    const token = verifyJwt.sign(
-      { id: saved._id, rol: saved.rol },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: '7d'
-      }
-    )
+    const token = generateSign(saved._id, saved.rol)
+    const { password: _, ...userWithoutPassword } = saved.toObject()
 
-    res.status(201).json({ token, user: saved })
+    res.status(201).json({ token, user: userWithoutPassword })
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Error al registrar usuario', details: error.message })
+    res.status(500).json({
+      message: 'Error al registrar usuario',
+      details: error.message
+    })
   }
 }
 
