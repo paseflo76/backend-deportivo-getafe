@@ -13,14 +13,24 @@ const app = express()
 
 app.use(express.json())
 
-app.use(
+app.options(
+  '*',
+  cors({
+    origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+  })
+)
+
+/* app.use(
   cors({
     origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
   })
-)
+) */
 
 app.use(express.urlencoded({ extended: true }))
 
