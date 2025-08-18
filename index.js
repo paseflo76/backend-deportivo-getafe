@@ -11,7 +11,8 @@ const { connecDB } = require('./src/config/db')
 
 const app = express()
 
-// ✅ Configuración CORS (solo una)
+app.use(express.json())
+
 app.use(
   cors({
     origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
@@ -21,7 +22,6 @@ app.use(
   })
 )
 
-app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // Servir archivos estáticos de avatars
