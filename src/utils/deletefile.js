@@ -1,6 +1,6 @@
 const cloudinary = require('cloudinary').v2
 
-const deleteFile = (url) => {
+const deleteFile = async (url) => {
   if (!url) return
 
   try {
@@ -10,9 +10,7 @@ const deleteFile = (url) => {
     if (!folder || !name) return
 
     const publicId = `${folder}/${name}`
-    cloudinary.uploader.destroy(publicId, (err, res) => {
-      if (err) console.error('Error al eliminar en Cloudinary:', err)
-    })
+    await cloudinary.uploader.destroy(publicId) // devuelve promesa
   } catch (err) {
     console.error('Error en deleteFile:', err.message)
   }

@@ -3,6 +3,7 @@ const { generateSign } = require('../../config/jwt')
 const bcrypt = require('bcrypt')
 const { validateRegister } = require('../../utils/validateUser')
 const { deleteFile } = require('../../utils/deletefile')
+/* const { deleteFile } = require('../../utils/deletefile') */
 
 const getUsers = async (req, res) => {
   try {
@@ -93,13 +94,28 @@ const updateUser = async (req, res) => {
     const { id } = req.params
     const { rol, ...data } = req.body
 
-    const updated = await User.findByIdAndUpdate(
-      id,
-      { ...data, ...(rol && { rol }) },
-      { new: true }
-    )
-    if (!updated)
+    if (req.user._id.toString() !== id && req.user.rol !== 'admin') {
+      return res
+        .status(403)
+        .json({ message: 'No autorizado para actualizar este usuario' })
+    }
+
+    const allowedFields = ['name', 'email']
+    const updateData = {}
+    for (const key of allowedFields) {
+      if (data[key] !== undefined) updateData[key] = data[key]
+    }
+
+    if (rol && req.user.rol === 'admin') {
+      updateData.rol = rol
+    }
+
+    const updated = await User.findByIdAndUpdate(id, updateData, {
+      new: true
+    }).select('-password')
+    if (!updated) {
       return res.status(404).json({ message: 'Usuario no encontrado' })
+    }
 
     res.status(200).json(updated)
   } catch (error) {
@@ -137,22 +153,32 @@ const deleteUser = async (req, res) => {
 const uploadAvatar = async (req, res) => {
   try {
     const { id } = req.params
-    if (!req.file)
+    if (!req.file) {
       return res.status(400).json({ message: 'Archivo no enviado' })
+    }
 
     const user = await User.findById(id)
-    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' })
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' })
+    }
+
+    // si ya tiene un avatar, lo borramos antes de guardar el nuevo
+    if (user.avatar) {
+      await deleteFile(user.avatar)
+    }
 
     user.avatar = req.file.path
     await user.save()
 
-    res
-      .status(200)
-      .json({ message: 'Avatar subido correctamente', avatar: user.avatar })
+    res.status(200).json({
+      message: 'Avatar subido correctamente',
+      avatar: user.avatar
+    })
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Error al subir avatar', details: error.message })
+    res.status(500).json({
+      message: 'Error al subir avatar',
+      details: error.message
+    })
   }
 }
 

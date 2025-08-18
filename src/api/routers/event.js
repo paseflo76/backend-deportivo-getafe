@@ -9,8 +9,8 @@ const {
 } = require('../controller/event')
 
 const eventsRouters = require('express').Router()
-//? Rutas a los Eventos
 
+// Rutas a los Eventos
 eventsRouters.get('/tipos', (req, res) => {
   res.json(['Entrenamiento', 'Partido', 'Cena de equipo'])
 })
@@ -18,13 +18,7 @@ eventsRouters.get('/tipos', (req, res) => {
 eventsRouters.get('/', getEvents)
 eventsRouters.post('/', [isAuth, isAdmin], upload.single('img'), postEvents)
 eventsRouters.put('/:id', [isAuth], upload.single('img'), updateEvents)
-eventsRouters.delete(
-  '/:id',
-  [isAuth, isAdmin],
-  upload.single('img'),
-  deleteEvents
-)
-
+eventsRouters.delete('/:id', [isAuth, isAdmin], deleteEvents)
 eventsRouters.patch('/:id/asistencia', [isAuth], updateAsistencia)
 
 module.exports = eventsRouters
