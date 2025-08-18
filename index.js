@@ -13,28 +13,17 @@ const app = express()
 
 app.use(express.json())
 
-app.options(
-  '*',
+app.use(
   cors({
     origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true
   })
 )
 
-/* app.use(
-  cors({
-    origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-  })
-) */
-
 app.use(express.urlencoded({ extended: true }))
 
-// Servir archivos estáticos de avatars
 app.use(
   '/uploads/avatars',
   express.static(path.join(__dirname, 'uploads/avatars'))
@@ -48,11 +37,9 @@ cloudinary.config({
   api_secret: process.env.API_SECRET
 })
 
-// ✅ Routers con nombres consistentes
 app.use('/api/v2/eventos', eventsRouter)
 app.use('/api/v2/users', userRouter)
 
-// ✅ 404 correcto
 app.use((req, res) => {
   return res.status(404).json({ message: 'Route not found' })
 })
