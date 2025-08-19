@@ -3,7 +3,6 @@ const { generateSign } = require('../../config/jwt')
 const bcrypt = require('bcrypt')
 const { validateRegister } = require('../../utils/validateUser')
 const { deleteFile } = require('../../utils/deletefile')
-/* const { deleteFile } = require('../../utils/deletefile') */
 
 const getUsers = async (req, res) => {
   try {
@@ -94,40 +93,42 @@ const updateUser = async (req, res) => {
     const { id } = req.params
     const { rol, ...data } = req.body
 
-    if (req.user._id.toString() !== id && req.user.rol !== 'admin') {
+    // Solo admin puede cambiar roles
+    if (rol && req.user.rol !== 'admin') {
+      return res.status(403).json({ message: 'No autorizado para cambiar rol' })
+    }
+
+    // El usuario solo puede modificar su propio perfil (excepto admin)
+    if (req.user.rol !== 'admin' && req.user._id.toString() !== id) {
       return res
         .status(403)
-        .json({ message: 'No autorizado para actualizar este usuario' })
+        .json({ message: 'No autorizado para modificar este usuario' })
     }
 
-    const allowedFields = ['name', 'email']
-    const updateData = {}
-    for (const key of allowedFields) {
-      if (data[key] !== undefined) updateData[key] = data[key]
-    }
+    const updated = await User.findByIdAndUpdate(
+      id,
+      { ...data, ...(rol && { rol }) },
+      { new: true }
+    )
 
-    if (rol && req.user.rol === 'admin') {
-      updateData.rol = rol
-    }
-
-    const updated = await User.findByIdAndUpdate(id, updateData, {
-      new: true
-    }).select('-password')
     if (!updated) {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
     res.status(200).json(updated)
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Error al actualizar usuario', details: error.message })
+    res.status(500).json({
+      message: 'Error al actualizar usuario',
+      details: error.message
+    })
   }
 }
 
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params
+
+    // El usuario solo puede borrarse a sí mismo, salvo que sea admin
     if (req.user.rol !== 'admin' && req.user._id.toString() !== id) {
       return res
         .status(403)
@@ -135,18 +136,17 @@ const deleteUser = async (req, res) => {
     }
 
     const deleted = await User.findByIdAndDelete(id)
-    if (!deleted)
-      return res.status(404).json({ message: 'Usuario no encontrado' })
 
-    if (deleted.avatar) {
-      await deleteFile(deleted.avatar)
+    if (!deleted) {
+      return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
     res.status(200).json({ message: 'Usuario eliminado correctamente' })
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Error al eliminar usuario', details: error.message })
+    res.status(500).json({
+      message: 'Error al eliminar usuario',
+      details: error.message
+    })
   }
 }
 
@@ -162,7 +162,6 @@ const uploadAvatar = async (req, res) => {
       return res.status(404).json({ message: 'Usuario no encontrado' })
     }
 
-    // si ya tiene un avatar, lo borramos antes de guardar el nuevo
     if (user.avatar) {
       await deleteFile(user.avatar)
     }
