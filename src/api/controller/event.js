@@ -73,38 +73,38 @@ const updateAsistencia = async (req, res) => {
   try {
     const { id } = req.params // id del evento
     const userId = req.user._id
+
+    const evento = await Events.findById(id)
+    if (!evento)
+      return res.status(404).json({ message: 'Evento no encontrado' })
+
     const { estado } = req.body
 
-    // Validar estado
-    const estadosValidos = [
-      'Va a entrenar 👍',
-      'Va al partido 👍',
-      'Va a la cena 🍽️',
-      'En duda ❓',
-      'No puede ❌'
-    ]
+    let estadosValidos
+    switch (evento.tipo) {
+      case 'Partido':
+        estadosValidos = ['Va al partido 👍', 'En duda ❓', 'No puede ❌']
+        break
+      case 'Entrenamiento':
+        estadosValidos = ['Va a entrenar 👍', 'En duda ❓', 'No puede ❌']
+        break
+      case 'Cena de equipo':
+        estadosValidos = ['Va a la cena 🍽️', 'En duda ❓', 'No puede ❌']
+        break
+      default:
+        estadosValidos = ['En duda ❓', 'No puede ❌']
+    }
 
     if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ message: 'Estado no válido' })
     }
 
-    const evento = await Events.findById(id)
-    if (!evento) {
-      return res.status(404).json({ message: 'Evento no encontrado' })
-    }
-
-    // Buscar si ya existe el usuario en asistentes
     const index = evento.asistentes.findIndex(
       (a) => a.user.toString() === userId.toString()
     )
 
-    if (index !== -1) {
-      // Si ya existe, actualiza el estado
-      evento.asistentes[index].estado = estado
-    } else {
-      // Si no existe, lo agrega
-      evento.asistentes.push({ user: userId, estado })
-    }
+    if (index !== -1) evento.asistentes[index].estado = estado
+    else evento.asistentes.push({ user: userId, estado })
 
     const eventoActualizado = await evento.save()
     return res.status(200).json(eventoActualizado)

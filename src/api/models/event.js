@@ -16,15 +16,19 @@ const eventSchema = new mongoose.Schema(
         user: { type: mongoose.Types.ObjectId, ref: 'User', required: false },
         estado: {
           type: String,
-          enum: ['Va a entrenar 👍', 'En duda ❓', 'No puede ❌'],
-          default: 'En duda'
+          enum: [
+            'Va a entrenar 👍',
+            'Va al partido 👍',
+            'Va a la cena 🍽️',
+            'En duda ❓',
+            'No puede ❌'
+          ],
+          default: 'En duda ❓'
         }
       }
     ]
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true }
 )
 
 const Events = mongoose.model('events', eventSchema, 'events')
