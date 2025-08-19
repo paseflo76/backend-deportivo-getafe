@@ -76,7 +76,12 @@ const updateAsistencia = async (req, res) => {
     const { estado } = req.body
 
     // Validar estado
-    const estadosValidos = ['Va a entrenar 👍', 'En duda ❓', 'No puede ❌']
+    const estadosValidos = [
+      'Va a entrenar 👍',
+      'En duda ❓',
+      'No puede ❌',
+      'Va a la cena 🍽️'
+    ]
     if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ message: 'Estado no válido' })
     }
