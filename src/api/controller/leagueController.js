@@ -1,5 +1,5 @@
 const Match = require('../models/Match')
-const { getClassification } = require('../services/classification')
+const { getClassification } = require('../../utils/classification')
 
 async function addMatch(req, res) {
   try {
@@ -11,7 +11,7 @@ async function addMatch(req, res) {
 }
 
 async function getMatches(req, res) {
-  const jornada = req.params.jornada
+  const jornada = req.params.jornada || null
   const query = jornada ? { jornada } : {}
   const matches = await Match.find(query).sort({ jornada: 1, fecha: 1 })
   res.json(matches)
