@@ -10,7 +10,7 @@ const deleteFile = async (url) => {
     if (!folder || !name) return
 
     const publicId = `${folder}/${name}`
-    await cloudinary.uploader.destroy(publicId) // devuelve promesa
+    await cloudinary.uploader.destroy(publicId) 
   } catch (err) {
     console.error('Error en deleteFile:', err.message)
   }
