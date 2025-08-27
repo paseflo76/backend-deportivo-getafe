@@ -4,12 +4,12 @@ const {
   getMatches,
   classification
 } = require('../controller/leagueController')
-const { isAdmin } = require('../../middleware/auth')
+const { isAdmin, isAuth } = require('../../middleware/auth')
 
 const clasificacionRouter = express.Router()
 
-clasificacionRouter.post('/match', isAdmin, addMatch)
-clasificacionRouter.get('/matches/:jornada', getMatches)
-clasificacionRouter.get('/classification', classification)
+clasificacionRouter.post('/match', [isAuth, isAdmin], addMatch)
+clasificacionRouter.get('/matches/:jornada', [isAuth, isAdmin], getMatches)
+clasificacionRouter.get('/classification', [isAuth, isAdmin], classification)
 
 module.exports = clasificacionRouter
