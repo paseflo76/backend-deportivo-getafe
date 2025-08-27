@@ -9,7 +9,7 @@ const { isAdmin, isAuth } = require('../../middleware/auth')
 const clasificacionRouter = express.Router()
 
 clasificacionRouter.post('/match', [isAuth, isAdmin], addMatch)
-clasificacionRouter.get('/matches/:jornada', [isAuth, isAdmin], getMatches)
-clasificacionRouter.get('/classification', [isAuth, isAdmin], classification)
+clasificacionRouter.get('/matches/:jornada', [isAuth], getMatches)
+clasificacionRouter.get('/classification', [isAuth], classification)
 
 module.exports = clasificacionRouter
