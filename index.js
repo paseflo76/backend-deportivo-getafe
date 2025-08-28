@@ -8,6 +8,7 @@ const cloudinary = require('cloudinary').v2
 const eventsRouter = require('./src/api/routers/event')
 const userRouter = require('./src/api/routers/user')
 const classificationRouter = require('./src/api/routers/league')
+
 const { connecDB } = require('./src/config/db')
 
 const app = express()
@@ -40,7 +41,7 @@ cloudinary.config({
 
 app.use('/api/v2/eventos', eventsRouter)
 app.use('/api/v2/users', userRouter)
-app.use('/api/v2/Match', classificationRouter)
+app.use('/api/v2/match', classificationRouter)
 
 app.use((req, res) => {
   return res.status(404).json({ message: 'Route not found' })

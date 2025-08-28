@@ -17,9 +17,20 @@ async function getMatches(req, res) {
   res.json(matches)
 }
 
+async function updateMatch(req, res) {
+  try {
+    const match = await Match.findByIdAndUpdate(req.params.id, req.body, {
+      new: true
+    })
+    res.json(match)
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+}
+
 async function classification(req, res) {
   const table = await getClassification()
   res.json(table)
 }
 
-module.exports = { addMatch, getMatches, classification }
+module.exports = { addMatch, getMatches, updateMatch, classification }
