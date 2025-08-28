@@ -11,7 +11,7 @@ async function addMatch(req, res) {
 }
 
 async function getMatches(req, res) {
-  const jornada = req.params.jornada || null
+  const jornada = req.params.jornada
   const query = jornada ? { jornada } : {}
   const matches = await Match.find(query).sort({ jornada: 1, fecha: 1 })
   res.json(matches)

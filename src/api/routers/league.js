@@ -10,7 +10,7 @@ const { isAdmin, isAuth } = require('../../middleware/auth')
 const clasificacionRouter = express.Router()
 
 clasificacionRouter.post('/match', [isAuth, isAdmin], addMatch)
-clasificacionRouter.get('/matches/:jornada?', [isAuth], getMatches)
+clasificacionRouter.get('/matches/:jornada', [isAuth], getMatches)
 clasificacionRouter.patch('/match/:id', [isAuth, isAdmin], updateMatch)
 clasificacionRouter.get('/classification', [isAuth], classification)
 
