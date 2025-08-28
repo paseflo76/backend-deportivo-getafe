@@ -1,6 +1,7 @@
 const Match = require('../models/Match')
 const { getClassification } = require('../../utils/classification')
 
+// Crea un partido
 async function addMatch(req, res) {
   try {
     const match = await Match.create(req.body)
@@ -10,6 +11,7 @@ async function addMatch(req, res) {
   }
 }
 
+// Obtiene partidos, con jornada opcional
 async function getMatches(req, res) {
   const jornada = req.params.jornada
   const query = jornada ? { jornada } : {}
@@ -17,6 +19,7 @@ async function getMatches(req, res) {
   res.json(matches)
 }
 
+// Actualiza resultado de un partido (solo admin)
 async function updateMatch(req, res) {
   try {
     const match = await Match.findByIdAndUpdate(req.params.id, req.body, {
@@ -28,6 +31,7 @@ async function updateMatch(req, res) {
   }
 }
 
+// Devuelve la clasificación
 async function classification(req, res) {
   const table = await getClassification()
   res.json(table)
