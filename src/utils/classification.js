@@ -1,38 +1,45 @@
-export async function renderClasificacion(containerId) {
-  const res = await fetch('/api/league/classification')
-  const data = await res.json()
+const Match = require('../api/models/Match')
 
-  const container = document.getElementById(containerId)
-  container.innerHTML = ''
-
-  const table = document.createElement('table')
-  table.className = 'tabla-clasificacion'
-
-  const thead = document.createElement('thead')
-  thead.innerHTML = `
-    <tr>
-      <th>Equipo</th>
-      <th>Puntos</th>
-      <th>GF</th>
-      <th>GC</th>
-      <th>DIF</th>
-    </tr>
-  `
-  table.appendChild(thead)
-
-  const tbody = document.createElement('tbody')
-  data.forEach((e) => {
-    const tr = document.createElement('tr')
-    tr.innerHTML = `
-      <td>${e.equipo}</td>
-      <td>${e.puntos}</td>
-      <td>${e.gf}</td>
-      <td>${e.gc}</td>
-      <td>${e.gf - e.gc}</td>
-    `
-    tbody.appendChild(tr)
+async function getClassification() {
+  const matches = await Match.find({
+    golesLocal: { $ne: null },
+    golesVisitante: { $ne: null }
   })
-  table.appendChild(tbody)
 
-  container.appendChild(table)
+  const teamsMap = {}
+
+  matches.forEach((m) => {
+    const { local, visitante, golesLocal, golesVisitante } = m
+
+    if (!teamsMap[local])
+      teamsMap[local] = { equipo: local, puntos: 0, gf: 0, gc: 0 }
+    if (!teamsMap[visitante])
+      teamsMap[visitante] = { equipo: visitante, puntos: 0, gf: 0, gc: 0 }
+
+    teamsMap[local].gf += golesLocal
+    teamsMap[local].gc += golesVisitante
+    teamsMap[visitante].gf += golesVisitante
+    teamsMap[visitante].gc += golesLocal
+
+    if (golesLocal > golesVisitante) {
+      teamsMap[local].puntos += 3
+    } else if (golesLocal < golesVisitante) {
+      teamsMap[visitante].puntos += 3
+    } else {
+      teamsMap[local].puntos += 1
+      teamsMap[visitante].puntos += 1
+    }
+  })
+
+  const table = Object.values(teamsMap).sort((a, b) => {
+    const diffA = a.gf - a.gc
+    const diffB = b.gf - b.gc
+    if (b.puntos !== a.puntos) return b.puntos - a.puntos
+    if (diffB !== diffA) return diffB - diffA
+    return b.gf - a.gf
+  })
+
+  return table
 }
+
+module.exports = { getClassification }
