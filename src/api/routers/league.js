@@ -10,20 +10,20 @@ const {
 } = require('../controller/leagueController')
 const { isAdmin, isAuth } = require('../../middleware/auth')
 
-const router = express.Router()
+const leagueRouter = require('express').Router()
 
 // Partidos
-router.post('/match', [isAuth, isAdmin], addMatch)
-router.get('/matches', [isAuth], getMatches)
-router.get('/matches/:jornada', [isAuth], getMatches)
-router.patch('/match/:id', [isAuth, isAdmin], updateMatch)
+leagueRouter.post('/match', [isAuth, isAdmin], addMatch)
+leagueRouter.get('/matches', [isAuth], getMatches)
+leagueRouter.get('/matches/:jornada', [isAuth], getMatches)
+leagueRouter.patch('/match/:id', [isAuth, isAdmin], updateMatch)
 
 // Clubs
-router.post('/club', [isAuth, isAdmin], addClub)
-router.get('/clubs', [isAuth], getClubs)
-router.patch('/club/:id/expel', [isAuth, isAdmin], expelClub)
+leagueRouter.post('/club', [isAuth, isAdmin], addClub)
+leagueRouter.get('/clubs', [isAuth], getClubs)
+leagueRouter.patch('/club/:id/expel', [isAuth, isAdmin], expelClub)
 
 // Clasificación
-router.get('/classification', [isAuth], classification)
+leagueRouter.get('/classification', [isAuth], classification)
 
-module.exports = router
+module.exports = leagueRouter
