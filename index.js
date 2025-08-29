@@ -4,7 +4,7 @@ const cors = require('cors')
 const path = require('path')
 const cloudinary = require('cloudinary').v2
 
-// Nombres consistentes
+// Routers
 const eventsRouter = require('./src/api/routers/event')
 const userRouter = require('./src/api/routers/user')
 const classificationRouter = require('./src/api/routers/league')
@@ -14,6 +14,7 @@ const { connecDB } = require('./src/config/db')
 const app = express()
 
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 app.use(
   cors({
@@ -23,8 +24,6 @@ app.use(
     credentials: true
   })
 )
-
-app.use(express.urlencoded({ extended: true }))
 
 app.use(
   '/uploads/avatars',

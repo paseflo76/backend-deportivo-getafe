@@ -3,23 +3,25 @@ const {
   addMatch,
   getMatches,
   updateMatch,
-  classification
-} = require('../controller/leagueController')
+  classification,
+  addTeam,
+  expelTeam
+} = require('../controllers/leagueController')
 const { isAdmin, isAuth } = require('../../middleware/auth')
 
 const clasificacionRouter = express.Router()
 
-// Crear partido
+// Partidos
 clasificacionRouter.post('/match', [isAuth, isAdmin], addMatch)
-
-// Listar todas las jornadas o una específica
 clasificacionRouter.get('/matches', [isAuth], getMatches)
 clasificacionRouter.get('/matches/:jornada', [isAuth], getMatches)
-
-// Actualizar resultado de un partido
 clasificacionRouter.patch('/match/:id', [isAuth, isAdmin], updateMatch)
 
-// Obtener clasificación
+// Clasificación
 clasificacionRouter.get('/classification', [isAuth], classification)
+
+// Equipos
+clasificacionRouter.post('/team', [isAuth, isAdmin], addTeam)
+clasificacionRouter.patch('/team/:id/expel', [isAuth, isAdmin], expelTeam)
 
 module.exports = clasificacionRouter

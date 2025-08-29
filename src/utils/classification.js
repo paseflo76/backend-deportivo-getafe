@@ -1,45 +1,53 @@
-const Match = require('../api/models/Match')
+const Match = require('../models/Match')
+const Team = require('../models/Team')
 
 async function getClassification() {
-  const matches = await Match.find({
-    golesLocal: { $ne: null },
-    golesVisitante: { $ne: null }
-  })
+  const teams = await Team.find()
+  const matches = await Match.find()
 
-  const teamsMap = {}
+  const table = teams.map((t) => ({
+    equipo: t.nombre,
+    puntos: 0,
+    gf: 0,
+    gc: 0,
+    activo: t.activo,
+    expulsadoEn: t.expulsadoEn
+  }))
+
+  const findTeam = (name) => table.find((t) => t.equipo === name)
 
   matches.forEach((m) => {
-    const { local, visitante, golesLocal, golesVisitante } = m
+    if (m.golesLocal == null || m.golesVisitante == null) return
 
-    if (!teamsMap[local])
-      teamsMap[local] = { equipo: local, puntos: 0, gf: 0, gc: 0 }
-    if (!teamsMap[visitante])
-      teamsMap[visitante] = { equipo: visitante, puntos: 0, gf: 0, gc: 0 }
+    const local = findTeam(m.local)
+    const visitante = findTeam(m.visitante)
 
-    teamsMap[local].gf += golesLocal
-    teamsMap[local].gc += golesVisitante
-    teamsMap[visitante].gf += golesVisitante
-    teamsMap[visitante].gc += golesLocal
+    // Si un equipo fue expulsado antes o en esta jornada -> no cuenta
+    if (
+      (local && local.expulsadoEn && m.jornada >= local.expulsadoEn) ||
+      (visitante && visitante.expulsadoEn && m.jornada >= visitante.expulsadoEn)
+    ) {
+      return
+    }
 
-    if (golesLocal > golesVisitante) {
-      teamsMap[local].puntos += 3
-    } else if (golesLocal < golesVisitante) {
-      teamsMap[visitante].puntos += 3
-    } else {
-      teamsMap[local].puntos += 1
-      teamsMap[visitante].puntos += 1
+    if (!local || !visitante) return
+
+    local.gf += m.golesLocal
+    local.gc += m.golesVisitante
+    visitante.gf += m.golesVisitante
+    visitante.gc += m.golesLocal
+
+    if (m.golesLocal > m.golesVisitante) local.puntos += 3
+    else if (m.golesLocal < m.golesVisitante) visitante.puntos += 3
+    else {
+      local.puntos += 1
+      visitante.puntos += 1
     }
   })
 
-  const table = Object.values(teamsMap).sort((a, b) => {
-    const diffA = a.gf - a.gc
-    const diffB = b.gf - b.gc
-    if (b.puntos !== a.puntos) return b.puntos - a.puntos
-    if (diffB !== diffA) return diffB - diffA
-    return b.gf - a.gf
-  })
-
-  return table
+  return table.sort(
+    (a, b) => b.puntos - a.puntos || b.gf - b.gc - (a.gf - a.gc) || b.gf - a.gf
+  )
 }
 
 module.exports = { getClassification }
