@@ -6,8 +6,8 @@ const {
   classification,
   addTeam,
   expelTeam
-} = require('../controllers/leagueController')
-const { isAdmin, isAuth } = require('../../middleware/auth')
+} = require('../controller/leagueController')
+const { isAuth, isAdmin } = require('../../middleware/auth')
 
 const clasificacionRouter = express.Router()
 

@@ -9,4 +9,5 @@ const matchSchema = new mongoose.Schema({
   fecha: { type: Date, required: true }
 })
 
-module.exports = mongoose.model('Match', matchSchema)
+const Match = mongoose.model('Match', matchSchema)
+module.exports = Match

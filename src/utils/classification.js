@@ -22,13 +22,11 @@ async function getClassification() {
     const local = findTeam(m.local)
     const visitante = findTeam(m.visitante)
 
-    // Si un equipo fue expulsado antes o en esta jornada -> no cuenta
     if (
       (local && local.expulsadoEn && m.jornada >= local.expulsadoEn) ||
       (visitante && visitante.expulsadoEn && m.jornada >= visitante.expulsadoEn)
-    ) {
+    )
       return
-    }
 
     if (!local || !visitante) return
 

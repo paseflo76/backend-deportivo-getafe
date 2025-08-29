@@ -1,5 +1,5 @@
-const Match = require('../models/Match')
-const Team = require('../models/Team')
+const Match = require('../../models/Match')
+const Team = require('../../models/Team')
 const { getClassification } = require('../../utils/classification')
 
 // Crear partido
@@ -12,7 +12,7 @@ async function addMatch(req, res) {
   }
 }
 
-// Obtener partidos (todas las jornadas o una específica)
+// Obtener partidos
 async function getMatches(req, res) {
   const jornada = req.params.jornada
   const query = jornada ? { jornada } : {}
@@ -20,7 +20,7 @@ async function getMatches(req, res) {
   res.json(matches)
 }
 
-// Actualizar resultado de un partido
+// Actualizar partido
 async function updateMatch(req, res) {
   try {
     const match = await Match.findByIdAndUpdate(req.params.id, req.body, {
@@ -38,7 +38,7 @@ async function classification(req, res) {
   res.json(table)
 }
 
-// Registrar un equipo
+// Crear equipo
 async function addTeam(req, res) {
   try {
     const team = await Team.create(req.body)
@@ -48,7 +48,7 @@ async function addTeam(req, res) {
   }
 }
 
-// Expulsar equipo (lo marca como inactivo y guarda jornada expulsión)
+// Expulsar equipo
 async function expelTeam(req, res) {
   try {
     const { id } = req.params

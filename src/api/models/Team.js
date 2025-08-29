@@ -6,4 +6,6 @@ const teamSchema = new mongoose.Schema({
   expulsadoEn: { type: Number, default: null } // nº de jornada de expulsión
 })
 
-module.exports = mongoose.model('Team', teamSchema)
+
+const Team = mongoose.model('Team', teamSchema)
+module.exports = Team
