@@ -14,7 +14,8 @@ const clubs = [
   'San Francis FC',
   'Deportivo Getafe',
   'Villabetis',
-  'Celtic de Esparta'
+  'Celtic de Esparta',
+  'Los Brasas'
 ]
 
 async function seed() {
