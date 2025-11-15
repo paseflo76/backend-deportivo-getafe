@@ -4,7 +4,8 @@ const {
   addJugador,
   addPortero
 } = require('../controller/statsController')
-const { isAuth, isAdmin } = require('../middleware/auth') // asegúrate de la ruta correcta
+const { isAuth, isAdmin } = require('../../middleware/auth')
+// asegúrate de la ruta correcta
 
 const statsRouter = Router()
 
