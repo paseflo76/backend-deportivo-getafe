@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seedClubs": "node src/utils/Seed.js"
+    "seedClubs": "node src/utils/Seed.js",
+    "seedStats": "node src/utils/seedStats.js"
   },
   "keywords": [],
   "author": "",
