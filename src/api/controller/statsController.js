@@ -43,5 +43,17 @@ const addPortero = async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
+const deletePortero = async (req, res) => {
+  const { id } = req.params
+  try {
+    const portero = await Portero.findById(id)
+    if (!portero)
+      return res.status(404).json({ message: 'Portero no encontrado' })
+    await portero.remove()
+    res.json({ message: 'Portero eliminado' })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
 
-module.exports = { getStats, addJugador, addPortero }
+module.exports = { getStats, addJugador, addPortero, deletePortero }
