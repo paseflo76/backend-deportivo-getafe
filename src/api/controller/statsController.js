@@ -49,7 +49,9 @@ const deletePortero = async (req, res) => {
     const portero = await Portero.findById(id)
     if (!portero)
       return res.status(404).json({ message: 'Portero no encontrado' })
-    await portero.remove()
+
+    // Corregido: usar deleteOne en lugar de remove
+    await portero.deleteOne()
     res.json({ message: 'Portero eliminado' })
   } catch (error) {
     res.status(500).json({ message: error.message })
