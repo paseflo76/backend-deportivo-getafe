@@ -19,10 +19,12 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use(
   cors({
-    origin: 'https://frontend-deportivo-getafe-exlw.vercel.app',
+    origin: [
+      'https://frontend-deportivo-getafe-exlw.vercel.app', // producción
+      'http://localhost:3000' // localhost para desarrollo
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-    /* credentials: true */
   })
 )
 

@@ -51,6 +51,25 @@ const updateMatch = async (req, res) => {
   }
 }
 
+// PUT /api/v2/league/matches/jornada/:jornada/clear
+const clearJornadaResults = async (req, res) => {
+  try {
+    const { jornada } = req.params
+    const result = await Match.updateMany(
+      { jornada: Number(jornada) },
+      { $set: { golesLocal: null, golesVisitante: null } }
+    )
+    res.status(200).json({
+      message: `Se han borrado los resultados de la jornada ${jornada}`,
+      modifiedCount: result.modifiedCount
+    })
+  } catch (err) {
+    res
+      .status(400)
+      .json({ message: 'Error al borrar resultados', error: err.message })
+  }
+}
+
 // DELETE /api/v2/league/matches/:id
 const deleteMatch = async (req, res) => {
   try {
@@ -68,6 +87,7 @@ module.exports = {
   getAllMatches,
   getMatchesByJornada,
   createMatch,
+  clearJornadaResults,
   updateMatch,
   deleteMatch
 }

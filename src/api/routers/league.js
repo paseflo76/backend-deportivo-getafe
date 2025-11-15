@@ -5,7 +5,8 @@ const {
   getMatchesByJornada,
   createMatch,
   updateMatch,
-  deleteMatch
+  deleteMatch,
+  clearJornadaResults
 } = require('../controller/leagueController')
 
 // Rutas públicas y administrativas
@@ -14,5 +15,6 @@ router.get('/matches/:jornada', getMatchesByJornada)
 router.post('/matches', createMatch)
 router.put('/matches/:id', updateMatch)
 router.delete('/matches/:id', deleteMatch)
+router.put('/matches/jornada/:jornada/clear', clearJornadaResults)
 
 module.exports = router
