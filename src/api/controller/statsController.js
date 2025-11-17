@@ -112,6 +112,7 @@ module.exports = {
   addJugador,
   addPortero,
   deletePortero,
+  deleteJugador,
   updateJugador,
   updatePortero
 }

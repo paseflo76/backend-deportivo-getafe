@@ -3,10 +3,10 @@ const {
   getStats,
   addJugador,
   addPortero,
-  deletePortero,
-  deleteJugador,
   updateJugador,
-  updatePortero
+  updatePortero,
+  deleteJugador,
+  deletePortero
 } = require('../controller/statsController')
 const { isAuth, isAdmin } = require('../../middleware/auth')
 
