@@ -3,7 +3,8 @@ const {
   getStats,
   addJugador,
   addPortero,
-  deletePortero
+  deletePortero,
+  deleteJugador
 } = require('../controller/statsController')
 const { isAuth, isAdmin } = require('../../middleware/auth')
 
