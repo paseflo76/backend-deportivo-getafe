@@ -43,6 +43,21 @@ const addPortero = async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
+
+const deleteJugador = async (req, res) => {
+  const { id } = req.params
+  try {
+    const jugador = await Jugador.findById(id)
+    if (!jugador)
+      return res.status(404).json({ message: 'Jugador no encontrado' })
+
+    await jugador.deleteOne()
+    res.json({ message: 'Jugador eliminado' })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 const deletePortero = async (req, res) => {
   const { id } = req.params
   try {
@@ -58,4 +73,10 @@ const deletePortero = async (req, res) => {
   }
 }
 
-module.exports = { getStats, addJugador, addPortero, deletePortero }
+module.exports = {
+  getStats,
+  addJugador,
+  addPortero,
+  deleteJugador,
+  deletePortero
+}
