@@ -10,6 +10,40 @@ const getStats = async (req, res) => {
   }
 }
 
+// Actualizar jugador (reemplaza goles/asistencias)
+const updateJugador = async (req, res) => {
+  const { id } = req.params
+  const { goles, asistencias } = req.body
+  try {
+    const jugador = await Jugador.findById(id)
+    if (!jugador)
+      return res.status(404).json({ message: 'Jugador no encontrado' })
+    if (goles !== undefined) jugador.goles = goles
+    if (asistencias !== undefined) jugador.asistencias = asistencias
+    await jugador.save()
+    res.json(jugador)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// Actualizar portero (reemplaza goles recibidos / partidos)
+const updatePortero = async (req, res) => {
+  const { id } = req.params
+  const { golesRecibidos, partidos } = req.body
+  try {
+    const portero = await Portero.findById(id)
+    if (!portero)
+      return res.status(404).json({ message: 'Portero no encontrado' })
+    if (golesRecibidos !== undefined) portero.golesRecibidos = golesRecibidos
+    if (partidos !== undefined) portero.partidos = partidos
+    await portero.save()
+    res.json(portero)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 const addJugador = async (req, res) => {
   const { nombre, goles = 0, asistencias = 0 } = req.body
   try {
@@ -77,6 +111,7 @@ module.exports = {
   getStats,
   addJugador,
   addPortero,
-  deleteJugador,
-  deletePortero
+  deletePortero,
+  updateJugador,
+  updatePortero
 }
