@@ -28,7 +28,26 @@ const getMatchesByJornada = async (req, res) => {
 // POST /api/v2/league/matches
 const createMatch = async (req, res) => {
   try {
-    const match = new Match(req.body)
+    const payload = {
+      jornada: Number(req.body.jornada),
+      fecha: req.body.fecha,
+      local: req.body.local,
+      visitante: req.body.visitante,
+      golesLocal: req.body.golesLocal ?? null,
+      golesVisitante: req.body.golesVisitante ?? null
+    }
+
+    const exists = await Match.findOne({
+      jornada: payload.jornada,
+      local: payload.local,
+      visitante: payload.visitante
+    })
+
+    if (exists) {
+      return res.status(409).json({ message: 'Ya existe este partido' })
+    }
+
+    const match = new Match(payload)
     const saved = await match.save()
     res.status(201).json(saved)
   } catch (err) {
@@ -42,7 +61,30 @@ const createMatch = async (req, res) => {
 const updateMatch = async (req, res) => {
   try {
     const { id } = req.params
-    const updated = await Match.findByIdAndUpdate(id, req.body, { new: true })
+
+    const payload = {
+      jornada:
+        req.body.jornada !== undefined ? Number(req.body.jornada) : undefined,
+      fecha: req.body.fecha,
+      local: req.body.local,
+      visitante: req.body.visitante,
+      golesLocal: req.body.golesLocal ?? null,
+      golesVisitante: req.body.golesVisitante ?? null
+    }
+
+    if (payload.jornada && payload.local && payload.visitante) {
+      const duplicate = await Match.findOne({
+        _id: { $ne: id },
+        jornada: payload.jornada,
+        local: payload.local,
+        visitante: payload.visitante
+      })
+      if (duplicate) {
+        return res.status(409).json({ message: 'Duplicado detectado' })
+      }
+    }
+
+    const updated = await Match.findByIdAndUpdate(id, payload, { new: true })
     if (!updated)
       return res.status(404).json({ message: 'Partido no encontrado' })
     res.status(200).json(updated)
