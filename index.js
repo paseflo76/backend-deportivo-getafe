@@ -11,6 +11,7 @@ const leagueRouter = require('./src/api/routers/league')
 
 const { connecDB } = require('./src/config/db')
 const statsRouter = require('./src/api/routers/stats')
+const routersancion = require('./src/api/routers/sanciones')
 
 const app = express()
 
@@ -45,6 +46,7 @@ app.use('/api/v2/eventos', eventsRouter)
 app.use('/api/v2/users', userRouter)
 app.use('/api/v2/league', leagueRouter)
 app.use('/api/v2/stats', statsRouter)
+app.use('/api/v2/sanciones', routersancion)
 
 app.use((req, res) => {
   return res.status(404).json({ message: 'Route not found' })
