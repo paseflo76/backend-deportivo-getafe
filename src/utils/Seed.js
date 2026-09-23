@@ -5,17 +5,17 @@ const Match = require('./src/api/models/Match')
 const { connecDB } = require('../src/config/db')
 
 const clubs = [
-  'Olimpic Ucrania',
-  'Arsenal Getafe',
-  'Grupo de Empresas Airbus',
-  'Real Campo Real',
-  'Cervezas club',
-  'Bravo Getafe',
-  'San Francis FC',
-  'Deportivo Getafe',
-  'Villabetis',
-  'Celtic de Esparta',
-  'Los Brasas'
+  'ARSENAL GETAFE',
+  'BRAVO GETAFE',
+  'CELTIC DE ESPARTA',
+  'CHACARITAS GETAFE',
+  'DEPORTIVO GETAFE',
+  'G.E AIRBUS',
+  'LOS BRASAS',
+  'OLIMPIC DE UCRANIA',
+  'SAN FRANCIS FC',
+  'CAFETEROS FC',
+  'CERVEZAS CLUB'
 ]
 
 async function seed() {
