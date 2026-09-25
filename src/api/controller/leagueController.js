@@ -3,12 +3,17 @@ const Match = require('../models/Match')
 // GET /api/v2/league/matches
 const getAllMatches = async (req, res) => {
   try {
-    const matches = await Match.find().sort({ jornada: 1, fecha: 1 })
+    const matches = await Match.find().sort({
+      jornada: 1,
+      fecha: 1
+    })
+
     res.status(200).json(matches)
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: 'Error al obtener partidos', error: err.message })
+    res.status(500).json({
+      message: 'Error al obtener partidos',
+      error: err.message
+    })
   }
 }
 
@@ -16,12 +21,19 @@ const getAllMatches = async (req, res) => {
 const getMatchesByJornada = async (req, res) => {
   try {
     const { jornada } = req.params
-    const matches = await Match.find({ jornada }).sort({ fecha: 1 })
+
+    const matches = await Match.find({
+      jornada: Number(jornada)
+    }).sort({
+      fecha: 1
+    })
+
     res.status(200).json(matches)
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: 'Error al obtener jornada', error: err.message })
+    res.status(500).json({
+      message: 'Error al obtener jornada',
+      error: err.message
+    })
   }
 }
 
@@ -44,16 +56,20 @@ const createMatch = async (req, res) => {
     })
 
     if (exists) {
-      return res.status(409).json({ message: 'Ya existe este partido' })
+      return res.status(409).json({
+        message: 'Ya existe este partido'
+      })
     }
 
     const match = new Match(payload)
     const saved = await match.save()
+
     res.status(201).json(saved)
   } catch (err) {
-    res
-      .status(400)
-      .json({ message: 'Error al crear partido', error: err.message })
+    res.status(400).json({
+      message: 'Error al crear partido',
+      error: err.message
+    })
   }
 }
 
@@ -79,36 +95,94 @@ const updateMatch = async (req, res) => {
         local: payload.local,
         visitante: payload.visitante
       })
+
       if (duplicate) {
-        return res.status(409).json({ message: 'Duplicado detectado' })
+        return res.status(409).json({
+          message: 'Duplicado detectado'
+        })
       }
     }
 
     const updated = await Match.findByIdAndUpdate(id, payload, { new: true })
-    if (!updated)
-      return res.status(404).json({ message: 'Partido no encontrado' })
+
+    if (!updated) {
+      return res.status(404).json({
+        message: 'Partido no encontrado'
+      })
+    }
+
     res.status(200).json(updated)
   } catch (err) {
-    res.status(400).json({ message: 'Error al actualizar', error: err.message })
+    res.status(400).json({
+      message: 'Error al actualizar',
+      error: err.message
+    })
   }
 }
 
 // PUT /api/v2/league/matches/jornada/:jornada/clear
 const clearJornadaResults = async (req, res) => {
   try {
-    const { jornada } = req.params
+    const jornada = Number(req.params.jornada)
+
+    if (!Number.isInteger(jornada) || jornada < 1) {
+      return res.status(400).json({
+        message: 'Jornada no válida'
+      })
+    }
+
     const result = await Match.updateMany(
-      { jornada: Number(jornada) },
-      { $set: { golesLocal: null, golesVisitante: null } }
+      {
+        jornada: jornada
+      },
+      {
+        $set: {
+          golesLocal: null,
+          golesVisitante: null
+        }
+      }
     )
+
     res.status(200).json({
       message: `Se han borrado los resultados de la jornada ${jornada}`,
+      matchedCount: result.matchedCount,
       modifiedCount: result.modifiedCount
     })
   } catch (err) {
-    res
-      .status(400)
-      .json({ message: 'Error al borrar resultados', error: err.message })
+    console.error('Error al borrar resultados de la jornada:', err)
+
+    res.status(500).json({
+      message: 'Error al borrar resultados',
+      error: err.message
+    })
+  }
+}
+
+// PUT /api/v2/league/matches/reset
+const resetLeague = async (req, res) => {
+  try {
+    const result = await Match.updateMany(
+      {},
+      {
+        $set: {
+          golesLocal: null,
+          golesVisitante: null
+        }
+      }
+    )
+
+    res.status(200).json({
+      message: 'Liga reiniciada correctamente',
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount
+    })
+  } catch (err) {
+    console.error('Error al reiniciar la liga:', err)
+
+    res.status(500).json({
+      message: 'Error al reiniciar la liga',
+      error: err.message
+    })
   }
 }
 
@@ -116,12 +190,23 @@ const clearJornadaResults = async (req, res) => {
 const deleteMatch = async (req, res) => {
   try {
     const { id } = req.params
+
     const deleted = await Match.findByIdAndDelete(id)
-    if (!deleted)
-      return res.status(404).json({ message: 'Partido no encontrado' })
-    res.status(200).json({ message: 'Partido eliminado' })
+
+    if (!deleted) {
+      return res.status(404).json({
+        message: 'Partido no encontrado'
+      })
+    }
+
+    res.status(200).json({
+      message: 'Partido eliminado'
+    })
   } catch (err) {
-    res.status(400).json({ message: 'Error al eliminar', error: err.message })
+    res.status(400).json({
+      message: 'Error al eliminar',
+      error: err.message
+    })
   }
 }
 
@@ -129,7 +214,8 @@ module.exports = {
   getAllMatches,
   getMatchesByJornada,
   createMatch,
-  clearJornadaResults,
   updateMatch,
-  deleteMatch
+  deleteMatch,
+  clearJornadaResults,
+  resetLeague
 }
