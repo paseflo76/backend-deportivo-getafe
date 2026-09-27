@@ -8,7 +8,7 @@ const cloudinary = require('cloudinary').v2
 const eventsRouter = require('./src/api/routers/event')
 const userRouter = require('./src/api/routers/user')
 const leagueRouter = require('./src/api/routers/league')
-
+const cronicasRouter = require('./src/api/routers/cronicas')
 const { connecDB } = require('./src/config/db')
 const statsRouter = require('./src/api/routers/stats')
 const routersancion = require('./src/api/routers/sanciones')
@@ -47,7 +47,7 @@ app.use('/api/v2/users', userRouter)
 app.use('/api/v2/league', leagueRouter)
 app.use('/api/v2/stats', statsRouter)
 app.use('/api/v2/sanciones', routersancion)
-
+app.use('/api/v2/cronicas', cronicasRouter)
 app.use((req, res) => {
   return res.status(404).json({ message: 'Route not found' })
 })
