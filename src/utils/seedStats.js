@@ -6,7 +6,7 @@ const { connecDB } = require('../config/db')
 
 const jugadores = [
   'Carlos',
-  'Sergio',
+  'Hugo',
   'Marcos',
   'Paraka',
   'Alvaro',
@@ -15,21 +15,21 @@ const jugadores = [
   'Josete',
   'Juanfer',
   'Wel',
-  'Pozo',
+  'Alex',
   'Raul',
   'Lolo',
-  'Alex',
+  'Victor',
   'Jorge',
   'Rome',
   'Costi',
   'Super',
-  'Victor',
+  'Giles',
   'Alfonso',
   'Prior',
   'Villa',
-  'Hugo',
+  'Pozo',
   'Ales',
-  'Giles'
+  'Sergio'
 ]
 
 const porteros = ['Carlos', 'Ales', 'Super']
