@@ -20,6 +20,16 @@ const cronicaSchema = new mongoose.Schema(
       default: ''
     },
 
+    imagenEstrella: {
+      type: String,
+      default: ''
+    },
+
+    imagenResultados: {
+      type: String,
+      default: ''
+    },
+
     cronicas: [
       {
         partido: {

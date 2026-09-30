@@ -1,13 +1,14 @@
 const Cronica = require('../models/Cronica')
 
 // ======================================================
-// OBTENER TODAS LAS CRÓNICAS
-// GET /api/v2/cronicas
+// GET TODAS
 // ======================================================
 
 const getCronicas = async (req, res) => {
   try {
-    const cronicas = await Cronica.find().sort({ jornada: 1 })
+    const cronicas = await Cronica.find().sort({
+      jornada: 1
+    })
 
     res.status(200).json(cronicas)
   } catch (error) {
@@ -19,15 +20,16 @@ const getCronicas = async (req, res) => {
 }
 
 // ======================================================
-// OBTENER CRÓNICA DE UNA JORNADA
-// GET /api/v2/cronicas/:jornada
+// GET POR JORNADA
 // ======================================================
 
 const getCronicaByJornada = async (req, res) => {
   try {
     const jornada = Number(req.params.jornada)
 
-    const cronica = await Cronica.findOne({ jornada })
+    const cronica = await Cronica.findOne({
+      jornada
+    })
 
     if (!cronica) {
       return res.status(404).json({
@@ -45,13 +47,27 @@ const getCronicaByJornada = async (req, res) => {
 }
 
 // ======================================================
-// CREAR CRÓNICA
-// POST /api/v2/cronicas
+// CREAR
 // ======================================================
 
 const createCronica = async (req, res) => {
   try {
-    const { jornada, titular, resumen, cronicas } = req.body
+    const jornada = Number(req.body.jornada)
+
+    const titular = req.body.titular || ''
+    const resumen = req.body.resumen || ''
+
+    let cronicas = []
+
+    if (req.body.cronicas) {
+      try {
+        cronicas = JSON.parse(req.body.cronicas)
+      } catch (error) {
+        return res.status(400).json({
+          message: 'El formato de las crónicas no es válido'
+        })
+      }
+    }
 
     if (!jornada) {
       return res.status(400).json({
@@ -59,7 +75,9 @@ const createCronica = async (req, res) => {
       })
     }
 
-    const existe = await Cronica.findOne({ jornada })
+    const existe = await Cronica.findOne({
+      jornada
+    })
 
     if (existe) {
       return res.status(400).json({
@@ -67,15 +85,23 @@ const createCronica = async (req, res) => {
       })
     }
 
+    const imagenEstrella = req.files?.imagenEstrella?.[0]?.path || ''
+
+    const imagenResultados = req.files?.imagenResultados?.[0]?.path || ''
+
     const nuevaCronica = await Cronica.create({
       jornada,
       titular,
       resumen,
-      cronicas
+      cronicas,
+      imagenEstrella,
+      imagenResultados
     })
 
     res.status(201).json(nuevaCronica)
   } catch (error) {
+    console.error(error)
+
     res.status(500).json({
       message: 'Error al crear la crónica',
       error: error.message
@@ -84,28 +110,16 @@ const createCronica = async (req, res) => {
 }
 
 // ======================================================
-// ACTUALIZAR CRÓNICA
-// PUT /api/v2/cronicas/:jornada
+// ACTUALIZAR
 // ======================================================
 
 const updateCronica = async (req, res) => {
   try {
     const jornada = Number(req.params.jornada)
 
-    const { titular, resumen, cronicas } = req.body
-
-    const cronica = await Cronica.findOneAndUpdate(
-      { jornada },
-      {
-        titular,
-        resumen,
-        cronicas
-      },
-      {
-        new: true,
-        runValidators: true
-      }
-    )
+    const cronica = await Cronica.findOne({
+      jornada
+    })
 
     if (!cronica) {
       return res.status(404).json({
@@ -113,8 +127,48 @@ const updateCronica = async (req, res) => {
       })
     }
 
+    const titular =
+      req.body.titular !== undefined ? req.body.titular : cronica.titular
+
+    const resumen =
+      req.body.resumen !== undefined ? req.body.resumen : cronica.resumen
+
+    let cronicas = cronica.cronicas
+
+    if (req.body.cronicas !== undefined) {
+      try {
+        cronicas = JSON.parse(req.body.cronicas)
+      } catch (error) {
+        return res.status(400).json({
+          message: 'El formato de las crónicas no es válido'
+        })
+      }
+    }
+
+    let imagenEstrella = cronica.imagenEstrella
+
+    let imagenResultados = cronica.imagenResultados
+
+    if (req.files?.imagenEstrella?.[0]?.path) {
+      imagenEstrella = req.files.imagenEstrella[0].path
+    }
+
+    if (req.files?.imagenResultados?.[0]?.path) {
+      imagenResultados = req.files.imagenResultados[0].path
+    }
+
+    cronica.titular = titular
+    cronica.resumen = resumen
+    cronica.cronicas = cronicas
+    cronica.imagenEstrella = imagenEstrella
+    cronica.imagenResultados = imagenResultados
+
+    await cronica.save()
+
     res.status(200).json(cronica)
   } catch (error) {
+    console.error(error)
+
     res.status(500).json({
       message: 'Error al actualizar la crónica',
       error: error.message
@@ -123,8 +177,7 @@ const updateCronica = async (req, res) => {
 }
 
 // ======================================================
-// ELIMINAR CRÓNICA
-// DELETE /api/v2/cronicas/:jornada
+// DELETE
 // ======================================================
 
 const deleteCronica = async (req, res) => {

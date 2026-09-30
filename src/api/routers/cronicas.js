@@ -8,21 +8,64 @@ const {
   deleteCronica
 } = require('../controller/cronicasController')
 
+const { isAuth, isAdmin } = require('../../middleware/auth')
+
+const upload = require('../../middleware/file')
+
 const router = express.Router()
 
-// Obtener todas
+// ======================================================
+// GET
+// ======================================================
+
 router.get('/', getCronicas)
 
-// Obtener una jornada
 router.get('/:jornada', getCronicaByJornada)
 
-// Crear
-router.post('/', createCronica)
+// ======================================================
+// POST
+// ======================================================
 
-// Actualizar
-router.put('/:jornada', updateCronica)
+router.post(
+  '/',
+  [isAuth, isAdmin],
+  upload.fields([
+    {
+      name: 'imagenEstrella',
+      maxCount: 1
+    },
+    {
+      name: 'imagenResultados',
+      maxCount: 1
+    }
+  ]),
+  createCronica
+)
 
-// Eliminar
-router.delete('/:jornada', deleteCronica)
+// ======================================================
+// PUT
+// ======================================================
+
+router.put(
+  '/:jornada',
+  [isAuth, isAdmin],
+  upload.fields([
+    {
+      name: 'imagenEstrella',
+      maxCount: 1
+    },
+    {
+      name: 'imagenResultados',
+      maxCount: 1
+    }
+  ]),
+  updateCronica
+)
+
+// ======================================================
+// DELETE
+// ======================================================
+
+router.delete('/:jornada', [isAuth, isAdmin], deleteCronica)
 
 module.exports = router
