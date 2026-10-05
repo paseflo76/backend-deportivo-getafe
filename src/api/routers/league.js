@@ -9,7 +9,8 @@ const {
   updateMatch,
   deleteMatch,
   clearJornadaResults,
-  resetLeague
+  resetLeague,
+  syncCalendar
 } = require('../controller/leagueController')
 
 // GET /api/v2/league/matches
@@ -35,5 +36,7 @@ router.put('/matches/:id', updateMatch)
 
 // DELETE /api/v2/league/matches/:id
 router.delete('/matches/:id', deleteMatch)
+
+router.post('/matches/sync-calendar', syncCalendar)
 
 module.exports = router

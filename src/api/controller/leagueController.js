@@ -210,6 +210,132 @@ const deleteMatch = async (req, res) => {
   }
 }
 
+// ======================================================
+// SINCRONIZAR CALENDARIO ACTUAL
+// ======================================================
+
+const syncCalendar = async (req, res) => {
+  try {
+    const calendario = req.body.calendario
+
+    if (!Array.isArray(calendario) || calendario.length !== 22) {
+      return res.status(400).json({
+        message: 'El calendario debe contener exactamente 22 jornadas'
+      })
+    }
+
+    // --------------------------------------------
+    // Normalizamos nombres antiguos
+    // --------------------------------------------
+
+    const normalizarEquipo = (nombre) => {
+      if (!nombre) return nombre
+
+      if (nombre === 'G  EMPRESAS AIRBUS') {
+        return 'G.E AIRBUS'
+      }
+
+      return nombre
+    }
+
+    // --------------------------------------------
+    // Guardamos todos los resultados existentes
+    // --------------------------------------------
+
+    const partidosExistentes = await Match.find()
+
+    const resultadosValidos = new Map()
+
+    for (const partido of partidosExistentes) {
+      if (
+        partido.local == null ||
+        partido.visitante == null ||
+        partido.golesLocal == null ||
+        partido.golesVisitante == null
+      ) {
+        continue
+      }
+
+      const local = normalizarEquipo(partido.local)
+      const visitante = normalizarEquipo(partido.visitante)
+
+      // VILLABETIS ya no existe
+      if (local === 'VILLABETIS' || visitante === 'VILLABETIS') {
+        continue
+      }
+
+      const key = `${partido.jornada}|${local}|${visitante}`
+
+      // Conservamos el primer resultado encontrado
+      if (!resultadosValidos.has(key)) {
+        resultadosValidos.set(key, {
+          golesLocal: partido.golesLocal,
+          golesVisitante: partido.golesVisitante
+        })
+      }
+    }
+
+    // --------------------------------------------
+    // Borramos todos los partidos actuales
+    // --------------------------------------------
+
+    await Match.deleteMany({})
+
+    // --------------------------------------------
+    // Creamos de nuevo los 110 partidos
+    // según el calendario definitivo
+    // --------------------------------------------
+
+    const nuevosPartidos = []
+
+    for (let i = 0; i < calendario.length; i++) {
+      const jornada = i + 1
+      const jornadaArray = calendario[i]
+
+      const fechaItem = jornadaArray.find((item) => item.fecha)
+      const fecha = fechaItem?.fecha || null
+
+      for (const partido of jornadaArray) {
+        if (!partido.local || !partido.visitante) {
+          continue
+        }
+
+        const local = normalizarEquipo(partido.local)
+        const visitante = normalizarEquipo(partido.visitante)
+
+        const key = `${jornada}|${local}|${visitante}`
+
+        const resultado = resultadosValidos.get(key)
+
+        nuevosPartidos.push({
+          jornada,
+          fecha,
+          local,
+          visitante,
+          golesLocal: resultado?.golesLocal ?? null,
+          golesVisitante: resultado?.golesVisitante ?? null
+        })
+      }
+    }
+
+    const creados = await Match.insertMany(nuevosPartidos)
+
+    res.status(200).json({
+      message: 'Calendario sincronizado correctamente',
+      jornadas: calendario.length,
+      partidos: creados.length,
+      resultadosConservados: resultadosValidos.size
+    })
+  } catch (err) {
+    console.error('Error sincronizando calendario:', err)
+
+    res.status(500).json({
+      message: 'Error al sincronizar calendario',
+      error: err.message
+    })
+  }
+}
+
 module.exports = {
   getAllMatches,
   getMatchesByJornada,
@@ -217,5 +343,6 @@ module.exports = {
   updateMatch,
   deleteMatch,
   clearJornadaResults,
-  resetLeague
+  resetLeague,
+  syncCalendar
 }
