@@ -1,6 +1,10 @@
+const mongoose = require('mongoose')
 const Match = require('../models/Match')
 
-// GET /api/v2/league/matches
+// ======================================================
+// OBTENER TODOS LOS PARTIDOS
+// ======================================================
+
 const getAllMatches = async (req, res) => {
   try {
     const matches = await Match.find().sort({
@@ -10,14 +14,19 @@ const getAllMatches = async (req, res) => {
 
     res.status(200).json(matches)
   } catch (err) {
+    console.error('Error obteniendo partidos:', err)
+
     res.status(500).json({
-      message: 'Error al obtener partidos',
+      message: 'Error obteniendo partidos',
       error: err.message
     })
   }
 }
 
-// GET /api/v2/league/matches/:jornada
+// ======================================================
+// OBTENER PARTIDOS DE UNA JORNADA
+// ======================================================
+
 const getMatchesByJornada = async (req, res) => {
   try {
     const { jornada } = req.params
@@ -30,14 +39,19 @@ const getMatchesByJornada = async (req, res) => {
 
     res.status(200).json(matches)
   } catch (err) {
+    console.error('Error obteniendo jornada:', err)
+
     res.status(500).json({
-      message: 'Error al obtener jornada',
+      message: 'Error obteniendo jornada',
       error: err.message
     })
   }
 }
 
-// POST /api/v2/league/matches
+// ======================================================
+// CREAR PARTIDO
+// ======================================================
+
 const createMatch = async (req, res) => {
   try {
     const payload = {
@@ -49,6 +63,7 @@ const createMatch = async (req, res) => {
       golesVisitante: req.body.golesVisitante ?? null
     }
 
+    // Evitar partidos duplicados
     const exists = await Match.findOne({
       jornada: payload.jornada,
       local: payload.local,
@@ -57,23 +72,30 @@ const createMatch = async (req, res) => {
 
     if (exists) {
       return res.status(409).json({
-        message: 'Ya existe este partido'
+        message: 'El partido ya existe',
+        partido: exists
       })
     }
 
     const match = new Match(payload)
+
     const saved = await match.save()
 
     res.status(201).json(saved)
   } catch (err) {
-    res.status(400).json({
-      message: 'Error al crear partido',
+    console.error('Error creando partido:', err)
+
+    res.status(500).json({
+      message: 'Error creando partido',
       error: err.message
     })
   }
 }
 
-// PUT /api/v2/league/matches/:id
+// ======================================================
+// ACTUALIZAR PARTIDO
+// ======================================================
+
 const updateMatch = async (req, res) => {
   try {
     const { id } = req.params
@@ -81,13 +103,21 @@ const updateMatch = async (req, res) => {
     const payload = {
       jornada:
         req.body.jornada !== undefined ? Number(req.body.jornada) : undefined,
+
       fecha: req.body.fecha,
+
       local: req.body.local,
+
       visitante: req.body.visitante,
-      golesLocal: req.body.golesLocal ?? null,
-      golesVisitante: req.body.golesVisitante ?? null
+
+      golesLocal:
+        req.body.golesLocal !== undefined ? req.body.golesLocal : null,
+
+      golesVisitante:
+        req.body.golesVisitante !== undefined ? req.body.golesVisitante : null
     }
 
+    // Evitar duplicados al modificar
     if (payload.jornada && payload.local && payload.visitante) {
       const duplicate = await Match.findOne({
         _id: { $ne: id },
@@ -98,12 +128,14 @@ const updateMatch = async (req, res) => {
 
       if (duplicate) {
         return res.status(409).json({
-          message: 'Duplicado detectado'
+          message: 'Ya existe otro partido con esos datos'
         })
       }
     }
 
-    const updated = await Match.findByIdAndUpdate(id, payload, { new: true })
+    const updated = await Match.findByIdAndUpdate(id, payload, {
+      new: true
+    })
 
     if (!updated) {
       return res.status(404).json({
@@ -113,14 +145,48 @@ const updateMatch = async (req, res) => {
 
     res.status(200).json(updated)
   } catch (err) {
-    res.status(400).json({
-      message: 'Error al actualizar',
+    console.error('Error actualizando partido:', err)
+
+    res.status(500).json({
+      message: 'Error actualizando partido',
       error: err.message
     })
   }
 }
 
-// PUT /api/v2/league/matches/jornada/:jornada/clear
+// ======================================================
+// BORRAR PARTIDO
+// ======================================================
+
+const deleteMatch = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const deleted = await Match.findByIdAndDelete(id)
+
+    if (!deleted) {
+      return res.status(404).json({
+        message: 'Partido no encontrado'
+      })
+    }
+
+    res.status(200).json({
+      message: 'Partido eliminado correctamente'
+    })
+  } catch (err) {
+    console.error('Error eliminando partido:', err)
+
+    res.status(500).json({
+      message: 'Error eliminando partido',
+      error: err.message
+    })
+  }
+}
+
+// ======================================================
+// BORRAR RESULTADOS DE UNA JORNADA
+// ======================================================
+
 const clearJornadaResults = async (req, res) => {
   try {
     const jornada = Number(req.params.jornada)
@@ -133,7 +199,7 @@ const clearJornadaResults = async (req, res) => {
 
     const result = await Match.updateMany(
       {
-        jornada: jornada
+        jornada
       },
       {
         $set: {
@@ -144,21 +210,23 @@ const clearJornadaResults = async (req, res) => {
     )
 
     res.status(200).json({
-      message: `Se han borrado los resultados de la jornada ${jornada}`,
-      matchedCount: result.matchedCount,
-      modifiedCount: result.modifiedCount
+      message: `Resultados de la jornada ${jornada} borrados`,
+      modificados: result.modifiedCount
     })
   } catch (err) {
-    console.error('Error al borrar resultados de la jornada:', err)
+    console.error('Error borrando resultados de jornada:', err)
 
     res.status(500).json({
-      message: 'Error al borrar resultados',
+      message: 'Error borrando resultados',
       error: err.message
     })
   }
 }
 
-// PUT /api/v2/league/matches/reset
+// ======================================================
+// REINICIAR TODA LA LIGA
+// ======================================================
+
 const resetLeague = async (req, res) => {
   try {
     const result = await Match.updateMany(
@@ -173,50 +241,31 @@ const resetLeague = async (req, res) => {
 
     res.status(200).json({
       message: 'Liga reiniciada correctamente',
-      matchedCount: result.matchedCount,
-      modifiedCount: result.modifiedCount
+      modificados: result.modifiedCount
     })
   } catch (err) {
-    console.error('Error al reiniciar la liga:', err)
+    console.error('Error reiniciando liga:', err)
 
     res.status(500).json({
-      message: 'Error al reiniciar la liga',
-      error: err.message
-    })
-  }
-}
-
-// DELETE /api/v2/league/matches/:id
-const deleteMatch = async (req, res) => {
-  try {
-    const { id } = req.params
-
-    const deleted = await Match.findByIdAndDelete(id)
-
-    if (!deleted) {
-      return res.status(404).json({
-        message: 'Partido no encontrado'
-      })
-    }
-
-    res.status(200).json({
-      message: 'Partido eliminado'
-    })
-  } catch (err) {
-    res.status(400).json({
-      message: 'Error al eliminar',
+      message: 'Error reiniciando liga',
       error: err.message
     })
   }
 }
 
 // ======================================================
-// SINCRONIZAR CALENDARIO ACTUAL
+// SINCRONIZAR CALENDARIO
 // ======================================================
 
 const syncCalendar = async (req, res) => {
+  const session = await mongoose.startSession()
+
   try {
     const calendario = req.body.calendario
+
+    // ==================================================
+    // COMPROBAR CALENDARIO
+    // ==================================================
 
     if (!Array.isArray(calendario) || calendario.length !== 22) {
       return res.status(400).json({
@@ -224,49 +273,93 @@ const syncCalendar = async (req, res) => {
       })
     }
 
-    // --------------------------------------------
-    // Normalizamos nombres antiguos
-    // --------------------------------------------
+    // ==================================================
+    // NORMALIZAR EQUIPOS
+    // ==================================================
 
     const normalizarEquipo = (nombre) => {
       if (!nombre) return nombre
 
-      if (nombre === 'G  EMPRESAS AIRBUS') {
+      if (nombre === 'G  EMPRESAS AIRBUS' || nombre === 'G EMPRESAS AIRBUS') {
         return 'G.E AIRBUS'
       }
 
       return nombre
     }
 
-    // --------------------------------------------
-    // Guardamos todos los resultados existentes
-    // --------------------------------------------
+    // ==================================================
+    // CONVERTIR FECHA
+    // 27-09-26 -> Date
+    // ==================================================
+
+    const convertirFecha = (fecha) => {
+      if (!fecha) return null
+
+      const partes = fecha.split('-')
+
+      if (partes.length !== 3) {
+        return null
+      }
+
+      const dia = Number(partes[0])
+      const mes = Number(partes[1])
+      const anio = Number(partes[2])
+
+      if (
+        !Number.isInteger(dia) ||
+        !Number.isInteger(mes) ||
+        !Number.isInteger(anio)
+      ) {
+        return null
+      }
+
+      return new Date(2000 + anio, mes - 1, dia)
+    }
+
+    // ==================================================
+    // OBTENER PARTIDOS ANTIGUOS
+    // ==================================================
 
     const partidosExistentes = await Match.find()
+      .sort({
+        updatedAt: -1,
+        createdAt: -1
+      })
+      .lean()
+
+    // ==================================================
+    // CONSERVAR RESULTADOS VÁLIDOS
+    //
+    // Se utiliza LOCAL + VISITANTE como clave.
+    //
+    // No utilizamos la jornada porque algunos partidos
+    // antiguos estaban guardados en jornadas diferentes.
+    // ==================================================
 
     const resultadosValidos = new Map()
 
     for (const partido of partidosExistentes) {
-      if (
-        partido.local == null ||
-        partido.visitante == null ||
-        partido.golesLocal == null ||
-        partido.golesVisitante == null
-      ) {
+      if (!partido.local || !partido.visitante) {
+        continue
+      }
+
+      if (partido.golesLocal == null || partido.golesVisitante == null) {
         continue
       }
 
       const local = normalizarEquipo(partido.local)
+
       const visitante = normalizarEquipo(partido.visitante)
 
-      // VILLABETIS ya no existe
+      // No conservar partidos de VILLABETIS
       if (local === 'VILLABETIS' || visitante === 'VILLABETIS') {
         continue
       }
 
-      const key = `${partido.jornada}|${local}|${visitante}`
+      const key = `${local}|${visitante}`
 
-      // Conservamos el primer resultado encontrado
+      // Al estar ordenados por fecha de modificación,
+      // conservamos el resultado más reciente.
       if (!resultadosValidos.has(key)) {
         resultadosValidos.set(key, {
           golesLocal: partido.golesLocal,
@@ -275,35 +368,47 @@ const syncCalendar = async (req, res) => {
       }
     }
 
-    // --------------------------------------------
-    // Borramos todos los partidos actuales
-    // --------------------------------------------
-
-    await Match.deleteMany({})
-
-    // --------------------------------------------
-    // Creamos de nuevo los 110 partidos
-    // según el calendario definitivo
-    // --------------------------------------------
+    // ==================================================
+    // CREAR NUEVO CALENDARIO
+    // ==================================================
 
     const nuevosPartidos = []
 
     for (let i = 0; i < calendario.length; i++) {
       const jornada = i + 1
+
       const jornadaArray = calendario[i]
 
+      // Buscar fecha de la jornada
       const fechaItem = jornadaArray.find((item) => item.fecha)
-      const fecha = fechaItem?.fecha || null
+
+      const fecha = convertirFecha(fechaItem?.fecha)
 
       for (const partido of jornadaArray) {
+        // Ignorar elemento de fecha
+        if (partido.fecha) {
+          continue
+        }
+
+        // Ignorar descanso
+        if (partido.descansa) {
+          continue
+        }
+
         if (!partido.local || !partido.visitante) {
           continue
         }
 
         const local = normalizarEquipo(partido.local)
+
         const visitante = normalizarEquipo(partido.visitante)
 
-        const key = `${jornada}|${local}|${visitante}`
+        // Seguridad adicional
+        if (local === 'VILLABETIS' || visitante === 'VILLABETIS') {
+          continue
+        }
+
+        const key = `${local}|${visitante}`
 
         const resultado = resultadosValidos.get(key)
 
@@ -318,23 +423,96 @@ const syncCalendar = async (req, res) => {
       }
     }
 
-    const creados = await Match.insertMany(nuevosPartidos)
+    // ==================================================
+    // COMPROBAR QUE HAY 110 PARTIDOS
+    // ==================================================
+
+    if (nuevosPartidos.length !== 110) {
+      return res.status(400).json({
+        message: 'El calendario generado no contiene exactamente 110 partidos',
+        partidosGenerados: nuevosPartidos.length
+      })
+    }
+
+    // ==================================================
+    // COMPROBAR DUPLICADOS
+    // ==================================================
+
+    const claves = new Set()
+
+    for (const partido of nuevosPartidos) {
+      const key =
+        `${partido.jornada}|` + `${partido.local}|` + `${partido.visitante}`
+
+      if (claves.has(key)) {
+        return res.status(400).json({
+          message: 'Se ha detectado un partido duplicado en el calendario',
+          partido
+        })
+      }
+
+      claves.add(key)
+    }
+
+    // ==================================================
+    // TRANSACCIÓN
+    // ==================================================
+
+    session.startTransaction()
+
+    await Match.deleteMany(
+      {},
+      {
+        session
+      }
+    )
+
+    await Match.insertMany(nuevosPartidos, {
+      session,
+      ordered: true
+    })
+
+    await session.commitTransaction()
+
+    // ==================================================
+    // RESULTADOS CONSERVADOS
+    // ==================================================
+
+    const resultadosConservados = nuevosPartidos.filter(
+      (partido) => partido.golesLocal != null && partido.golesVisitante != null
+    ).length
+
+    // ==================================================
+    // RESPUESTA
+    // ==================================================
 
     res.status(200).json({
       message: 'Calendario sincronizado correctamente',
       jornadas: calendario.length,
-      partidos: creados.length,
-      resultadosConservados: resultadosValidos.size
+      partidos: nuevosPartidos.length,
+      resultadosConservados
     })
   } catch (err) {
     console.error('Error sincronizando calendario:', err)
+
+    try {
+      await session.abortTransaction()
+    } catch (abortError) {
+      console.error('Error abortando la transacción:', abortError)
+    }
 
     res.status(500).json({
       message: 'Error al sincronizar calendario',
       error: err.message
     })
+  } finally {
+    await session.endSession()
   }
 }
+
+// ======================================================
+// EXPORTACIONES
+// ======================================================
 
 module.exports = {
   getAllMatches,
